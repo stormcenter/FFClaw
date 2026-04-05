@@ -76,11 +76,8 @@ git clone https://github.com/your-repo/ClipCraft.git
 cd ClipCraft
 git submodule update --init
 
-# 安装 ClipCraft 依赖（npm 会自动解析 vendor/FFCreator 的 file: 路径）
+# 安装 ClipCraft 依赖（postinstall 脚本会自动安装 FFCreator 的依赖）
 npm install
-
-# 安装 FFCreator 子模块自己的依赖
-cd vendor/FFCreator && npm install --omit=dev && cd ../../..
 
 # 运行测试
 npm test
