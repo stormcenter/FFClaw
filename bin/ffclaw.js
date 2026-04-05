@@ -16,6 +16,7 @@ import templateCmd from '../src/commands/template.js';
 import previewCmd from '../src/commands/preview.js';
 import queueCmd from '../src/commands/queue.js';
 import exportCmd from '../src/commands/export.js';
+import transitionCmd from '../src/commands/transition.js';
 
 yargs(hideBin(process.argv))
   .scriptName('ffclaw')
@@ -56,6 +57,7 @@ yargs(hideBin(process.argv))
   .command(previewCmd)
   .command(queueCmd)
   .command(exportCmd)
+  .command(transitionCmd)
   // ── Defaults ─────────────────────────────────────────────────────────────────
   .demandCommand(1, 'Please specify a command.')
   .recommendCommands()

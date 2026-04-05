@@ -14,6 +14,8 @@
  */
 
 import path from 'node:path';
+import { GL_TRANSITIONS } from '../transitions/registry.js';
+import { buildEnvString } from '../transitions/params.js';
 
 // FFCreator is loaded lazily (dynamic import) so that commands which don't
 // render video (new, import, timeline show, …) can start without requiring
@@ -60,6 +62,48 @@ const TRANSITION_MAP = {
 
 /** Default transition when an unknown effect name is given. */
 const DEFAULT_TRANSITION = 'fade';
+
+/** GL Transition effect name prefix. */
+const GL_TRANSITION_PREFIX = 'gl:';
+
+/**
+ * Resolve a transition effect name into a structured descriptor.
+ *
+ * @param {string} effect  Effect name, e.g. 'fade', 'gl:cross-zoom'
+ * @returns {{ type: 'ffcreator'|'gl', effect?: string, glslFile?: string, params?: Array, name?: string }}
+ */
+function resolveEffect(effect) {
+  if (effect.startsWith(GL_TRANSITION_PREFIX)) {
+    const name = effect.slice(GL_TRANSITION_PREFIX.length);
+    const gl = GL_TRANSITIONS[name];
+    if (!gl) {
+      const err = new Error(`GL Transition '${name}' not found in registry`);
+      err.code = 'TRANSITION_GLSL_NOT_FOUND';
+      throw err;
+    }
+    return { type: 'gl', name, glslFile: gl.glslFile, params: gl.params };
+  }
+  return { type: 'ffcreator', effect: TRANSITION_MAP[effect] ?? DEFAULT_TRANSITION };
+}
+
+/**
+ * Build the FFmpeg gltransition filter string for a GL Transition.
+ *
+ * @param {string} glslFile  GLSL filename relative to vendor/gl-transitions/
+ * @param {number} duration  Transition duration in seconds
+ * @param {Record<string,any>|undefined} userParams  User-supplied params
+ * @param {Array} paramSchema  Param schema from registry
+ * @param {string} projectDir  Project directory (for resolving texture paths)
+ * @returns {string}  FFmpeg filter string
+ */
+function buildGLTransitionFilter(glslFile, duration, userParams, paramSchema, projectDir) {
+  const glslPath = path.resolve(projectDir, 'vendor/gl-transitions', glslFile);
+  const defaultNoise = path.resolve(projectDir, 'vendor/gl-transitions/textures', 'default-noise.png');
+  const envStr = buildEnvString(userParams, paramSchema, projectDir, defaultNoise);
+  const parts = [`duration=${duration}`, `source=${glslPath}`];
+  if (envStr) parts.push(`env=${envStr}`);
+  return `gltransition=${parts.join(':')}`;
+}
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -308,10 +352,28 @@ export async function build(model, projectData, projectDir, renderOpts = {}) {
       // Look up any transition declared between this clip and the next
       const transKey    = nextClip ? `${clip.id}:${nextClip.id}` : null;
       const transition  = transKey ? (transitionMap.get(transKey) ?? null) : null;
-      const transEffect = transition
-        ? (TRANSITION_MAP[transition.effect] ?? DEFAULT_TRANSITION)
-        : null;
       const transDur = transition?.duration ?? 0.5;
+
+      // Resolve effect — handles both FFCreator strings and gl: prefixed GL transitions
+      let transEffect = null;
+      let glTransFilter = null;
+
+      if (transition) {
+        const resolved = resolveEffect(transition.effect);
+        if (resolved.type === 'gl') {
+          // Store the FFmpeg filter string for later use (FFClaw doesn't use
+          // FFCreator transitions for GL effects; those are rendered via FFmpeg)
+          glTransFilter = buildGLTransitionFilter(
+            resolved.glslFile,
+            transDur,
+            transition.params,
+            resolved.params,
+            projectDir,
+          );
+        } else {
+          transEffect = resolved.effect;
+        }
+      }
 
       const scene = buildVideoScene(clip, projectData, projectDir, transEffect, transDur);
 

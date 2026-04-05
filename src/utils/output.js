@@ -111,6 +111,8 @@ export const Errors = /** @type {const} */ ({
   TEMPLATE_NOT_FOUND: 'TEMPLATE_NOT_FOUND',
   MISSING_VARIABLE: 'MISSING_VARIABLE',
   TRANSITION_NOT_FOUND: 'TRANSITION_NOT_FOUND',
+  TRANSITION_GLSL_NOT_FOUND: "GL Transition '{name}' not found in registry",
+  TRANSITION_INVALID_PARAMS: "Invalid parameters for transition '{name}': {reason}",
   FILTER_NOT_FOUND: 'FILTER_NOT_FOUND',
   QUEUE_EMPTY: 'QUEUE_EMPTY',
   QUEUE_JOB_NOT_FOUND: 'QUEUE_JOB_NOT_FOUND',
