@@ -35,6 +35,8 @@ ClipCraft/
 │       ├── output.js           # 统一输出（普通/JSON/Quiet）
 │       ├── table.js            # 时间线 ASCII 表格
 │       └── id-gen.js          # clip ID 生成（c1/c2...）
+├── vendor/                     # Git submodule
+│   └── FFCreator/             # FFCreator 源码（https://github.com/tnfe/FFCreator）
 ├── templates/                   # 内置模板
 │   ├── product-showcase.cfc.json
 │   ├── slideshow.cfc.json
@@ -58,20 +60,27 @@ ClipCraft/
 ## 与 FFCreator 的关系
 
 ```
-ClipCraft/src/      ← 纯新增，不碰 FFCreator 代码
-FFCreator/          ← 作为 peerDependency 引用
+ClipCraft/src/          ← 纯新增，不碰 FFCreator 代码
+ClipCraft/vendor/FFCreator  ← FFCreator 作为 git submodule
 ```
 
-ClipCraft 作为独立 npm 包发布，依赖 FFCreator 作为 peer dependency。
+FFCreator 作为 git submodule 嵌套在 `vendor/FFCreator`，与 ClipCraft 共同版本管理。
 
 ## 开发
 
 ```bash
-# 安装依赖
+# 克隆项目（含 submodule）
+git clone --recursive https://github.com/your-repo/ClipCraft.git
+# 或克隆后单独拉取 submodule
+git clone https://github.com/your-repo/ClipCraft.git
+cd ClipCraft
+git submodule update --init
+
+# 安装 ClipCraft 依赖（npm 会自动解析 vendor/FFCreator 的 file: 路径）
 npm install
 
-# 链接本地 FFCreator（开发时）
-npm link ../FFCreatorClaw
+# 安装 FFCreator 子模块自己的依赖
+cd vendor/FFCreator && npm install --omit=dev && cd ../../..
 
 # 运行测试
 npm test
@@ -85,7 +94,7 @@ npm run test:integration
 # lint
 npm run lint
 
-# CLI 调试（本地 link 后）
+# CLI 调试
 node bin/clipcraft.js --help
 ```
 
@@ -116,15 +125,7 @@ FFCreator 是场景串联模型，ClipCraft 是多轨并行模型。Builder 负�
 4. 设置 Scene transition
 5. 全局音频 + 文字分配
 
-### FFCreator 改动（极小）
-
-| 文件 | 改动 | 原因 |
-|------|------|------|
-| `ffprobe.js` | 标准化返回值 | import 需要统一的 duration/width/height/hasAudio |
-| `synthesis.js` | 透传 FFmpeg filtergraph | filter adjust 需要注入 eq/unsharp |
-| `index.js` | 确认 node 类导出 | builder.js 需要 FFVideo/FFText 等 |
-
-这些改动作为 FFCreator 的小 PR 合入，不影响 FFCreator 自身功能。
+FFCreator 已作为 git submodule 管理（见上方项目结构中的 `vendor/FFCreator`）。如需在 FFCreator 侧做改动，在 `vendor/FFCreator` 中直接修改，提交后 submodule 会记录新的 commit 引用。
 
 ## License
 
