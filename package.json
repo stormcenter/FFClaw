@@ -30,8 +30,8 @@
   },
   "jest": {
     "transform": {},
-    "extensionsToTreatAsEsm": [".js"],
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "testPathIgnorePatterns": ["/node_modules/", "/vendor/"]
   },
   "keywords": [
     "video",
