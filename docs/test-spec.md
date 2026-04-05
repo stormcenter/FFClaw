@@ -1,6 +1,6 @@
-# ClipCraft 测试规范
+# FFClaw 测试规范
 
-> 本文档定义 ClipCraft 项目交付时的测试标准。所有功能必须通过本文档定义的测试用例方可视为完成。
+> 本文档定义 FFClaw 项目交付时的测试标准。所有功能必须通过本文档定义的测试用例方可视为完成。
 
 ---
 
@@ -78,7 +78,7 @@ test/fixtures/assets/
 
 | Case ID | 描述 | 输入 | 预期结果 |
 |---------|------|------|---------|
-| NEW-01 | 交互式创建默认项目 | `clipcraft new`（无参数） | 生成 `ffclaw.json`，ratio=16:9, fps=30 |
+| NEW-01 | 交互式创建默认项目 | `ffclaw new`（无参数） | 生成 `ffclaw.json`，ratio=16:9, fps=30 |
 | NEW-02 | 非交互式创建 | `--name "test" --ratio 9:16 --fps 60 --bg-color black` | 生成项目，width=1080, height=1920, fps=60，bgColor="#000000" |
 | NEW-03 | 创建重复名称项目 | 同名项目已存在时再次创建 | 提示项目已存在，不覆盖 |
 | NEW-04 | 指定无效分辨率 | `--ratio invalid` | 报错，提示有效选项 |

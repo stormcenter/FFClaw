@@ -71,7 +71,7 @@ describe('save and load', () => {
   let tmpDir;
 
   beforeEach(async () => {
-    tmpDir = await mkdtemp(path.join(tmpdir(), 'clipcraft-test-'));
+    tmpDir = await mkdtemp(path.join(tmpdir(), 'ffclaw-test-'));
   });
 
   afterEach(async () => {

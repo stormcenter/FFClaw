@@ -1,10 +1,10 @@
 {
-  "name": "clipcraft",
+  "name": "ffclaw",
   "version": "0.1.0",
   "description": "CLI video editor powered by FFCreator — the command-line剪映",
   "type": "module",
   "bin": {
-    "clipcraft": "./bin/clipcraft.js"
+    "ffclaw": "./bin/ffclaw.js"
   },
   "exports": {
     ".": "./src/index.js"

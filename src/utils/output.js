@@ -1,5 +1,5 @@
 /**
- * Unified output helpers for ClipCraft.
+ * Unified output helpers for FFClaw.
  *
  * Three modes (controlled by global CLI flags):
  *   normal  – human-friendly text to stdout, errors to stderr

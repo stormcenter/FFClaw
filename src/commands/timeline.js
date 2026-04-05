@@ -1,5 +1,5 @@
 /**
- * `clipcraft timeline` — manage the project timeline.
+ * `ffclaw timeline` — manage the project timeline.
  *
  * Sub-commands:
  *   timeline add video   <asset>          Add a video clip
@@ -616,7 +616,7 @@ async function loadProject(dir, opts) {
     return await load(dir);
   } catch (err) {
     if (err.code === 'PROJECT_NOT_FOUND') {
-      error(Errors.PROJECT_NOT_FOUND, `No project found at ${dir}.  Run \`clipcraft new\` first.`, opts);
+      error(Errors.PROJECT_NOT_FOUND, `No project found at ${dir}.  Run \`ffclaw new\` first.`, opts);
     }
     if (err.code === 'INVALID_PROJECT') {
       error(Errors.INVALID_PROJECT, err.message, opts);

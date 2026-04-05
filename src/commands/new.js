@@ -1,11 +1,11 @@
 /**
- * `clipcraft new` — initialise a new ClipCraft project.
+ * `ffclaw new` — initialise a new FFClaw project.
  *
  * Usage (non-interactive):
- *   clipcraft new my-video --ratio 16:9 --fps 30
+ *   ffclaw new my-video --ratio 16:9 --fps 30
  *
  * Usage (interactive — omit positional):
- *   clipcraft new
+ *   ffclaw new
  *
  * Interactive mode falls back to readline when stdin is a TTY and the
  * required positional <name> argument is missing.
@@ -28,7 +28,7 @@ import { print, ok, error, Errors } from '../utils/output.js';
 // ── Yargs command definition ──────────────────────────────────────────────────
 
 export const command = 'new [name]';
-export const desc    = 'Create a new ClipCraft project';
+export const desc    = 'Create a new FFClaw project';
 
 /** @param {import('yargs').Argv} yargs */
 export function builder(yargs) {

@@ -1,5 +1,5 @@
 /**
- * Timeline data model for ClipCraft.
+ * Timeline data model for FFClaw.
  *
  * Provides a fluent in-memory representation of the multi-track timeline.
  * Each mutating method returns `this` so calls can be chained.  Call
@@ -147,7 +147,7 @@ function nextTransitionId(transitions) {
 // ── TimelineModel ─────────────────────────────────────────────────────────────
 
 /**
- * Fluent in-memory model for the ClipCraft timeline.
+ * Fluent in-memory model for the FFClaw timeline.
  *
  * Wrap an existing TimelineData object (loaded from disk) to mutate it, then
  * call `.toJSON()` to retrieve the updated plain object for saving.

@@ -1,6 +1,6 @@
-# ClipCraft CLI — 设计文档
+# FFClaw CLI — 设计文档
 
-> 剪映是 GUI，ClipCraft 是 CLI 版剪映。面向会用剪映的剪辑师，无需写代码，像剪映一样操作即可。
+> 剪映是 GUI，FFClaw 是 CLI 版剪映。面向会用剪映的剪辑师，无需写代码，像剪映一样操作即可。
 
 ---
 
@@ -8,7 +8,7 @@
 
 ### 1.1 是什么
 
-**ClipCraft** 是基于 FFCreator 的命令行视频剪辑工具，将 FFCreator 的 WebGL 渲染能力封装为剪映风格的 CLI 接口。支持视频剪辑、模板创建、批量渲染，核心场景是 AI Agent 驱动的自动化视频生产。
+**FFClaw** 是基于 FFCreator 的命令行视频剪辑工具，将 FFCreator 的 WebGL 渲染能力封装为剪映风格的 CLI 接口。支持视频剪辑、模板创建、批量渲染，核心场景是 AI Agent 驱动的自动化视频生产。
 
 ### 1.2 核心目标
 
@@ -20,7 +20,7 @@
 ### 1.3 与 FFCreator 的关系
 
 - FFCreator 提供底层渲染能力（WebGL 场景图 + FFmpeg 编码）
-- ClipCraft 提供 CLI 封装层和项目文件系统
+- FFClaw 提供 CLI 封装层和项目文件系统
 - FFCreator 零改动（或极小改动，见 5.3 节）
 
 ---
@@ -28,7 +28,7 @@
 ## 2. 命令体系
 
 ```
-clipcraft <command>
+ffclaw <command>
 
 new          新建项目（交互式引导）
 import       导入素材到素材库
@@ -55,10 +55,10 @@ queue        批量渲染队列
 
 ```bash
 # 交互式创建
-clipcraft new
+ffclaw new
 
 # 非交互式创建
-clipcraft new --name "春季促销视频" --ratio 16:9 --fps 30 --bg-color black
+ffclaw new --name "春季促销视频" --ratio 16:9 --fps 30 --bg-color black
 ```
 
 分辨率选项：16:9（1920×1080）、9:16（1080×1920）、1:1（1080×1080）、自定义
@@ -72,17 +72,17 @@ my-project/
 ### 3.2 `import` — 导入素材
 
 ```bash
-clipcraft import video ./素材/产品视频A.mp4
-clipcraft import audio ./素材/背景音乐.mp3
-clipcraft import image ./素材/logo.png
-clipcraft import subtitle ./字幕/产品介绍.srt
+ffclaw import video ./素材/产品视频A.mp4
+ffclaw import audio ./素材/背景音乐.mp3
+ffclaw import image ./素材/logo.png
+ffclaw import subtitle ./字幕/产品介绍.srt
 
 # 查看素材库
-clipcraft import --list
+ffclaw import --list
 
 # 从素材库删除（误导入时清理）
-clipcraft import remove v1
-clipcraft import clear          # 清空所有素材
+ffclaw import remove v1
+ffclaw import clear          # 清空所有素材
 
 # 输出示例：
 # 视频 (2):
@@ -102,19 +102,19 @@ clipcraft import clear          # 清空所有素材
 
 ```bash
 # 添加视频
-clipcraft timeline add video v1
-clipcraft timeline add video v2 --start 15          # 从15s开始
-clipcraft timeline add video v3 --in 5 --out 12     # 裁剪入出点
+ffclaw timeline add video v1
+ffclaw timeline add video v2 --start 15          # 从15s开始
+ffclaw timeline add video v3 --in 5 --out 12     # 裁剪入出点
 
 # 添加图片（需指定持续时间）
-clipcraft timeline add image i1 --duration 5
+ffclaw timeline add image i1 --duration 5
 
 # 添加音频
-clipcraft timeline add audio a1 --loop              # 循环
-clipcraft timeline add audio a1 --start 20 --volume 0.5
+ffclaw timeline add audio a1 --loop              # 循环
+ffclaw timeline add audio a1 --start 20 --volume 0.5
 
 # 添加文字
-clipcraft timeline add text "春日特惠" \
+ffclaw timeline add text "春日特惠" \
   --start 0 --duration 3 \
   --font "PingFang SC" --size 48 --color "#FFFFFF" \
   --position center
@@ -123,7 +123,7 @@ clipcraft timeline add text "春日特惠" \
 #### 3.3.2 时间线查看
 
 ```bash
-clipcraft timeline show
+ffclaw timeline show
 
 # 输出：
 # ┌────────────────────────────────────────────────────────────────┐
@@ -146,17 +146,17 @@ clipcraft timeline show
 
 ```bash
 # 裁剪视频入出点
-clipcraft timeline trim c1 --in 3 --out 10
+ffclaw timeline trim c1 --in 3 --out 10
 
 # 分割视频（在指定时间点切开，返回两个新 clip）
-clipcraft timeline split c1 at 8
+ffclaw timeline split c1 at 8
 
 # 删除片段
-clipcraft timeline remove c1
+ffclaw timeline remove c1
 
 # 移动片段
-clipcraft timeline move c1 to 10      # 移动到10s
-clipcraft timeline move c1 --offset 5 # 相对移动+5s
+ffclaw timeline move c1 to 10      # 移动到10s
+ffclaw timeline move c1 --offset 5 # 相对移动+5s
 ```
 
 **JSON 输出示例（所有增删改操作）：**
@@ -177,16 +177,16 @@ clipcraft timeline move c1 --offset 5 # 相对移动+5s
 
 ```bash
 # 在指定两个 clip 之间添加转场
-clipcraft timeline add-transition fade --between c1 c2 --duration 1.0
+ffclaw timeline add-transition fade --between c1 c2 --duration 1.0
 
 # 默认：最后两个相邻 clip 之间（向下兼容）
-clipcraft timeline add-transition zoomright --duration 0.8
+ffclaw timeline add-transition zoomright --duration 0.8
 
 # 查看已设置的转场列表
-clipcraft timeline transitions list
+ffclaw timeline transitions list
 
 # 查看可用转场
-clipcraft timeline transitions
+ffclaw timeline transitions
 # 基础: fade, wipe, slide
 # 叠化: crossfade, blur
 # 特效: zoomright, gridflip, radial, rotate
@@ -196,37 +196,37 @@ clipcraft timeline transitions
 
 ```bash
 # 视频加速 2x
-clipcraft timeline speed c1 2.0
+ffclaw timeline speed c1 2.0
 
 # 视频慢动作 0.5x
-clipcraft timeline speed c1 0.5
+ffclaw timeline speed c1 0.5
 
 # 调整音频音量 (0.0 - 1.0)
-clipcraft timeline volume c3 0.8
+ffclaw timeline volume c3 0.8
 
 # 静音（音频轨道）
-clipcraft timeline volume c3 0
+ffclaw timeline volume c3 0
 
 # 静音视频原声（视频轨道的 clip）
-clipcraft timeline mute c1        # 静音 c1 的内嵌音频
-clipcraft timeline mute c1 off    # 取消静音
+ffclaw timeline mute c1        # 静音 c1 的内嵌音频
+ffclaw timeline mute c1 off    # 取消静音
 
 # 音频淡入/淡出（秒数）
-clipcraft timeline fade c3 --in 2 --out 3
+ffclaw timeline fade c3 --in 2 --out 3
 ```
 
 ### 3.4 `filter` — 滤镜与调色
 
 ```bash
 # 查看预设滤镜
-clipcraft filter list
+ffclaw filter list
 # warm_sunshine  暖阳（亮度+8, 饱和度+15, 色温+10）
 # cinema         电影（对比度+20, 饱和度-20, 亮度-5）
 # fresh          清新（亮度+5, 饱和度+5）
 # b_and_w        黑白（去饱和度）
 
 # 应用滤镜到片段
-clipcraft filter apply c1 --preset warm_sunshine
+ffclaw filter apply c1 --preset warm_sunshine
 
 # 手动调色（参数范围）
 # --brightness  <-100~100>  亮度，0 为原始（正值偏亮）
@@ -235,7 +235,7 @@ clipcraft filter apply c1 --preset warm_sunshine
 # --sharpen     <0~100>     锐化
 # --blur        <0~100>     模糊
 # --temperature <-100~100>  色温（正值偏暖）
-clipcraft filter adjust c1 \
+ffclaw filter adjust c1 \
   --brightness 10 \
   --contrast 15 \
   --saturation -5 \
@@ -244,10 +244,10 @@ clipcraft filter adjust c1 \
   --temperature 5
 
 # 重置滤镜
-clipcraft filter reset c1
+ffclaw filter reset c1
 
 # 创建自定义预设
-clipcraft filter create --name "我的调色" \
+ffclaw filter create --name "我的调色" \
   --brightness 10 --contrast 15 --saturation -5
 ```
 
@@ -257,20 +257,20 @@ clipcraft filter create --name "我的调色" \
 
 ```bash
 # 文字动画（对已添加的文字 clip 设置动画）
-clipcraft text animate c4 --in fadeIn --out slideUp --duration 0.5
+ffclaw text animate c4 --in fadeIn --out slideUp --duration 0.5
 
 # 查看可用动画
-clipcraft text animations
+ffclaw text animations
 # 入场: fadeIn, slideInLeft, slideInRight, zoomIn, bounceIn
 # 出场: fadeOut, slideOutLeft, slideOutRight, zoomOut
 # 循环: pulse, shake, float
 
 # 花字（渐变颜色，对文字 clip 设置渐变）
-clipcraft text gradient c4 \
+ffclaw text gradient c4 \
   --from "#FF6B35" --to "#FFB347" --angle 45
 
 # 添加字幕（从SRT文件，自动拆分为多个 text clip）
-clipcraft text subtitle ./字幕/产品介绍.srt \
+ffclaw text subtitle ./字幕/产品介绍.srt \
   --style caption --font "黑体" --size 36
 ```
 
@@ -278,10 +278,10 @@ clipcraft text subtitle ./字幕/产品介绍.srt \
 
 ```bash
 # 快速导出
-clipcraft export --output ./output/春季促销.mp4
+ffclaw export --output ./output/春季促销.mp4
 
 # 自定义参数
-clipcraft export \
+ffclaw export \
   --output ./output/春季促销.mp4 \
   --quality high \
   --crf 18 \
@@ -289,10 +289,10 @@ clipcraft export \
   --audio-bitrate 192k
 
 # 导出封面
-clipcraft export thumbnail --time 3 --output ./output/封面.jpg
+ffclaw export thumbnail --time 3 --output ./output/封面.jpg
 
 # 监听进度
-clipcraft export --watch
+ffclaw export --watch
 # [████████████████████░░░░] 80%  预计剩余 12s
 ```
 
@@ -303,17 +303,17 @@ clipcraft export --watch
 
 ```bash
 # 查看本地模板
-clipcraft template list
+ffclaw template list
 
 # 使用模板创建项目
-clipcraft template use 产品宣传片 \
+ffclaw template use 产品宣传片 \
   --vars title="春日新品" bg_video=v2 logo=i1
 
 # 从当前项目保存为模板
-clipcraft template save --name "我的模板" --tag "产品展示"
+ffclaw template save --name "我的模板" --tag "产品展示"
 
 # 查看模板信息
-clipcraft template info 产品宣传片
+ffclaw template info 产品宣传片
 # 变量:
 #   - title (必填): 主标题文字
 #   - bg_video (必填): 背景视频
@@ -321,23 +321,23 @@ clipcraft template info 产品宣传片
 #   - brand_color (可选): 品牌色，默认 #FF4500
 
 # 验证模板
-clipcraft template validate ./templates/产品宣传片.cfc.json
+ffclaw template validate ./templates/产品宣传片.cfc.json
 ```
 
 ### 3.8 `preview` — 预览
 
 ```bash
 # 预览整个时间线（生成低码率预览文件）
-clipcraft preview
+ffclaw preview
 
 # 预览某个片段
-clipcraft preview --clip v1
+ffclaw preview --clip v1
 
 # 预览某个时间点
-clipcraft preview --time 5
+ffclaw preview --time 5
 
 # 预览转场效果
-clipcraft preview --transition fade --clip1 v1 --clip2 v2
+ffclaw preview --transition fade --clip1 v1 --clip2 v2
 ```
 
 注：preview 使用 `crf=28 preset=ultrafast` 快速导出低码率预览，而非实时预览。
@@ -346,7 +346,7 @@ clipcraft preview --transition fade --clip1 v1 --clip2 v2
 
 ```bash
 # 批量渲染（JSONL 数据驱动）
-clipcraft queue render 产品宣传片 \
+ffclaw queue render 产品宣传片 \
   --data ./products.jsonl \
   --output-dir ./output/ \
   --concurrency 2
@@ -356,11 +356,11 @@ clipcraft queue render 产品宣传片 \
 # {"title":"产品B","bg_video":"b.mp4","_output":"product-b.mp4"}
 
 # 查看队列状态
-clipcraft queue status
+ffclaw queue status
 # 待处理: 50  |  渲染中: 2  |  完成: 23  |  失败: 0
 
 # 从队列移除任务
-clipcraft queue remove <task-id>
+ffclaw queue remove <task-id>
 ```
 
 ---
@@ -417,7 +417,7 @@ clipcraft queue remove <task-id>
 - `audio clip`：含 `in/out`（裁剪范围）、`fadeIn/fadeOut`（淡入淡出秒数）
 - `transitions.between`：转场所连接的两个 clip ID 数组 `[前一个, 后一个]`
 
-### 4.2 模板文件 .cfc.json（ClipCraft Template）
+### 4.2 模板文件 .cfc.json（FFClaw Template）
 
 ```json
 {
@@ -522,9 +522,9 @@ brand_color: "#FF6B35"
 ### 5.1 目录结构
 
 ```
-clipcraft/
+ffclaw/
 ├── bin/
-│   └── clipcraft.js           # CLI 入口（yargs 路由）
+│   └── ffclaw.js           # CLI 入口（yargs 路由）
 ├── src/
 │   ├── commands/              # 命令层（薄，只做参数解析+输出格式化）
 │   │   ├── new.js
@@ -561,7 +561,7 @@ clipcraft/
 
 ### 5.2 Builder 翻译层（核心难点）
 
-FFCreator 是场景串联模型，ClipCraft 是多轨并行模型。翻译层负责转换：
+FFCreator 是场景串联模型，FFClaw 是多轨并行模型。翻译层负责转换：
 
 ```
 多轨时间线输入
@@ -639,7 +639,7 @@ CLI 参数 / 模板文件
 所有命令支持 `--json`，输出机器可解析格式：
 
 ```bash
-clipcraft timeline show --json
+ffclaw timeline show --json
 # {
 #   "duration": 25,
 #   "tracks": {
@@ -649,7 +649,7 @@ clipcraft timeline show --json
 #   }
 # }
 
-clipcraft export --output out.mp4 --json
+ffclaw export --output out.mp4 --json
 # {"type":"start","output":"./out.mp4"}
 # {"type":"progress","percent":45,"frame":1350,"totalFrames":3000,"eta":"40s"}
 # {"type":"complete","output":"./out.mp4","duration":25,"size":"12.3MB"}
@@ -662,9 +662,9 @@ clipcraft export --output out.mp4 --json
 ### 6.2 MCP Tool 封装
 
 ```typescript
-const clipcraftRenderTool = {
-  name: "clipcraft_render",
-  description: "渲染 ClipCraft 模板为 MP4",
+const ffclawRenderTool = {
+  name: "ffclaw_render",
+  description: "渲染 FFClaw 模板为 MP4",
   inputSchema: {
     type: "object",
     properties: {
@@ -676,8 +676,8 @@ const clipcraftRenderTool = {
   }
 };
 
-const clipcraftClipTool = {
-  name: "clipcraft_clip",
+const ffclawClipTool = {
+  name: "ffclaw_clip",
   description: "从素材直接生成视频",
   inputSchema: {
     type: "object",
@@ -702,38 +702,38 @@ const clipcraftClipTool = {
 
 ```bash
 # 1. 新建项目
-clipcraft new --name "产品A视频" --ratio 16:9
+ffclaw new --name "产品A视频" --ratio 16:9
 
 # 2. 导入素材
-clipcraft import video ./素材/产品A.mp4
-clipcraft import audio ./素材/背景音乐.mp3
-clipcraft import image ./素材/logo.png
+ffclaw import video ./素材/产品A.mp4
+ffclaw import audio ./素材/背景音乐.mp3
+ffclaw import image ./素材/logo.png
 
 # 3. 时间线编辑
-clipcraft timeline add video v1
-clipcraft timeline add audio a1 --loop
-clipcraft timeline add image i1 --duration 5 --position right-bottom
-clipcraft timeline add text "新品上市" --style title --duration 3
-clipcraft timeline add-transition fade --between c1 c2 --duration 0.8
+ffclaw timeline add video v1
+ffclaw timeline add audio a1 --loop
+ffclaw timeline add image i1 --duration 5 --position right-bottom
+ffclaw timeline add text "新品上市" --style title --duration 3
+ffclaw timeline add-transition fade --between c1 c2 --duration 0.8
 
 # 4. 导出
-clipcraft export --output ./output/产品A.mp4 --quality high
+ffclaw export --output ./output/产品A.mp4 --quality high
 ```
 
 ### 工作流 2：批量生成（50个产品视频）
 
 ```bash
 # 1. 选择模板
-clipcraft template use 产品宣传片
+ffclaw template use 产品宣传片
 
 # 2. 批量渲染
-clipcraft queue render 产品宣传片 \
+ffclaw queue render 产品宣传片 \
   --data ./products.jsonl \
   --output-dir ./批量输出/ \
   --concurrency 3
 
 # 3. 监控
-clipcraft queue status
+ffclaw queue status
 ```
 
 ### 工作流 3：Agent 驱动
@@ -743,10 +743,10 @@ clipcraft queue status
 
 Agent 执行步骤:
 1. Read products/ → 获取文件列表
-2. clipcraft template list → 选择"产品宣传片"模板
-3. clipcraft template info 产品宣传片 → 获取变量列表
+2. ffclaw template list → 选择"产品宣传片"模板
+3. ffclaw template info 产品宣传片 → 获取变量列表
 4. 生成 products.jsonl（每个产品一行）
-5. clipcraft queue render 产品宣传片 --data products.jsonl --concurrency 3 --json
+5. ffclaw queue render 产品宣传片 --data products.jsonl --concurrency 3 --json
 6. 解析 JSON 进度流，汇报完成情况
 ```
 
@@ -756,7 +756,7 @@ Agent 执行步骤:
 
 ### P0 — MVP（能跑通最简工作流）
 
-1. bin/clipcraft.js + yargs 骨架
+1. bin/ffclaw.js + yargs 骨架
 2. src/core/project.js（new 命令可用）
 3. src/core/asset-store.js（import 命令可用）
 4. src/core/timeline-model.js（timeline add/show 可用）
@@ -825,13 +825,13 @@ Agent 执行步骤:
 
 | 项目 | 类型 | 模板系统 | 批量渲染 | Agent 友好 | 学习成本 |
 |------|------|---------|---------|------------|---------|
-| **ClipCraft** | CLI + FFCreator | ✅ CFC JSON | ✅ JSONL | ✅ --json | 低（剪映用户） |
+| **FFClaw** | CLI + FFCreator | ✅ CFC JSON | ✅ JSONL | ✅ --json | 低（剪映用户） |
 | LosslessCut | GUI（Electron） | ❌ | ❌ | ❌ | 中（FFmpeg概念） |
 | Remotion | React代码 | ✅ JSX | ✅ Lambda | ✅ API | 高（需写React） |
 | FFmpeg | CLI | ❌ | ❌ | ✅ | 极高（参数复杂） |
 | digitalsamba/toolkit | CLI + FFmpeg | ✅ | ✅ | ✅ | 中 |
 
-**ClipCraft 的差异化**：最面向剪映用户的 CLI 工具，模板系统简单直观，Agent 集成原生。
+**FFClaw 的差异化**：最面向剪映用户的 CLI 工具，模板系统简单直观，Agent 集成原生。
 
 ---
 
@@ -839,7 +839,7 @@ Agent 执行步骤:
 
 - 项目文件：`"version": "1.0"`（主版本.次版本）
 - 模板文件：`"version": "1.0.0"`（语义化版本）
-- 两者独立演进，ClipCraft 启动时检查兼容性。
+- 两者独立演进，FFClaw 启动时检查兼容性。
 
 ---
 

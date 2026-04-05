@@ -1,5 +1,5 @@
 /**
- * `clipcraft queue` — manage the export job queue.
+ * `ffclaw queue` — manage the export job queue.
  *
  * Sub-commands:
  *   queue list                       List queued / completed jobs
@@ -174,7 +174,7 @@ async function handleList(argv) {
   }
 
   if (jobs.length === 0) {
-    print('Queue is empty.  Use `clipcraft queue add` to add a render job.', opts);
+    print('Queue is empty.  Use `ffclaw queue add` to add a render job.', opts);
     return;
   }
 
@@ -522,7 +522,7 @@ async function runJob(job, projectData, dir, parallel, opts) {
  */
 function handleLoadError(err, dir, opts) {
   if (err.code === 'PROJECT_NOT_FOUND') {
-    error(Errors.PROJECT_NOT_FOUND, `No project found at ${dir}.  Run \`clipcraft new\` first.`, opts);
+    error(Errors.PROJECT_NOT_FOUND, `No project found at ${dir}.  Run \`ffclaw new\` first.`, opts);
   }
   if (err.code === 'INVALID_PROJECT') {
     error(Errors.INVALID_PROJECT, err.message, opts);

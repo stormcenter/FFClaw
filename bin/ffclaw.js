@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * ClipCraft CLI entry point.
+ * FFClaw CLI entry point.
  * Routes sub-commands via yargs and passes global flags to every handler.
  */
 
@@ -13,7 +13,7 @@ import timelineCmd from '../src/commands/timeline.js';
 import exportCmd from '../src/commands/export.js';
 
 yargs(hideBin(process.argv))
-  .scriptName('clipcraft')
+  .scriptName('ffclaw')
   .usage('$0 <command> [options]')
   // ── Global options ──────────────────────────────────────────────────────────
   .option('project', {

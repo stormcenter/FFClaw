@@ -1,5 +1,5 @@
 /**
- * `clipcraft filter` — manage and preview video/audio filter presets.
+ * `ffclaw filter` — manage and preview video/audio filter presets.
  *
  * Sub-commands:
  *   filter list                      List available filters
@@ -289,7 +289,7 @@ async function handleRemove(argv) {
  */
 function handleLoadError(err, dir, opts) {
   if (err.code === 'PROJECT_NOT_FOUND') {
-    error(Errors.PROJECT_NOT_FOUND, `No project found at ${dir}.  Run \`clipcraft new\` first.`, opts);
+    error(Errors.PROJECT_NOT_FOUND, `No project found at ${dir}.  Run \`ffclaw new\` first.`, opts);
   }
   if (err.code === 'INVALID_PROJECT') {
     error(Errors.INVALID_PROJECT, err.message, opts);

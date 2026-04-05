@@ -1,5 +1,5 @@
 /**
- * `clipcraft import` — add media assets to the project.
+ * `ffclaw import` — add media assets to the project.
  *
  * Sub-commands:
  *   import video   <file>     Add a video file
@@ -183,7 +183,7 @@ async function handleList(argv) {
 
   const total = Object.values(groups).reduce((n, arr) => n + arr.length, 0);
   if (total === 0) {
-    print('No assets imported yet.  Use `clipcraft import video <file>` to add one.', opts);
+    print('No assets imported yet.  Use `ffclaw import video <file>` to add one.', opts);
     return;
   }
 
@@ -283,7 +283,7 @@ async function handleClear(argv) {
  */
 function handleLoadError(err, dir, opts) {
   if (err.code === 'PROJECT_NOT_FOUND') {
-    error(Errors.PROJECT_NOT_FOUND, `No project found at ${dir}.  Run \`clipcraft new\` first.`, opts);
+    error(Errors.PROJECT_NOT_FOUND, `No project found at ${dir}.  Run \`ffclaw new\` first.`, opts);
   }
   if (err.code === 'INVALID_PROJECT') {
     error(Errors.INVALID_PROJECT, err.message, opts);

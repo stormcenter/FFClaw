@@ -1,5 +1,5 @@
 /**
- * ID generators for ClipCraft.
+ * ID generators for FFClaw.
  *
  * Two orthogonal ID spaces:
  *   Asset IDs  – v1, v2, a1, i1, s1 (prefix = type initial)

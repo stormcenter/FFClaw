@@ -1,5 +1,5 @@
 /**
- * `clipcraft preview` — render a preview of the project or a specific range.
+ * `ffclaw preview` — render a preview of the project or a specific range.
  *
  * Produces a low-resolution preview MP4 suitable for quick review before the
  * final export.  Uses lower quality settings for speed.
@@ -171,7 +171,7 @@ async function handlePreview(argv) {
  */
 function handleLoadError(err, dir, opts) {
   if (err.code === 'PROJECT_NOT_FOUND') {
-    error(Errors.PROJECT_NOT_FOUND, `No project found at ${dir}.  Run \`clipcraft new\` first.`, opts);
+    error(Errors.PROJECT_NOT_FOUND, `No project found at ${dir}.  Run \`ffclaw new\` first.`, opts);
   }
   if (err.code === 'INVALID_PROJECT') {
     error(Errors.INVALID_PROJECT, err.message, opts);

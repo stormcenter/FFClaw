@@ -1,5 +1,5 @@
 /**
- * `clipcraft text` — manage text overlays and subtitle clips.
+ * `ffclaw text` — manage text overlays and subtitle clips.
  *
  * Sub-commands:
  *   text add     <content>           Add a text overlay clip
@@ -214,7 +214,7 @@ async function handleList(argv) {
   }
 
   if (textClips.length === 0) {
-    print('No text clips on the timeline.  Use `clipcraft text add` to add one.', opts);
+    print('No text clips on the timeline.  Use `ffclaw text add` to add one.', opts);
     return;
   }
 
@@ -359,7 +359,7 @@ async function handleStyle(argv) {
  */
 function handleLoadError(err, dir, opts) {
   if (err.code === 'PROJECT_NOT_FOUND') {
-    error(Errors.PROJECT_NOT_FOUND, `No project found at ${dir}.  Run \`clipcraft new\` first.`, opts);
+    error(Errors.PROJECT_NOT_FOUND, `No project found at ${dir}.  Run \`ffclaw new\` first.`, opts);
   }
   if (err.code === 'INVALID_PROJECT') {
     error(Errors.INVALID_PROJECT, err.message, opts);

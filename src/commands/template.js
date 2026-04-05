@@ -1,5 +1,5 @@
 /**
- * `clipcraft template` — manage and apply text templates.
+ * `ffclaw template` — manage and apply text templates.
  *
  * Sub-commands:
  *   template list                       List saved templates
@@ -147,7 +147,7 @@ async function handleList(argv) {
 
   const names = Object.keys(templates);
   if (names.length === 0) {
-    print('No templates saved.  Use `clipcraft template create <name> <content>` to save one.', opts);
+    print('No templates saved.  Use `ffclaw template create <name> <content>` to save one.', opts);
     return;
   }
 
@@ -437,7 +437,7 @@ async function handleVars(argv) {
  */
 function handleLoadError(err, dir, opts) {
   if (err.code === 'PROJECT_NOT_FOUND') {
-    error(Errors.PROJECT_NOT_FOUND, `No project found at ${dir}.  Run \`clipcraft new\` first.`, opts);
+    error(Errors.PROJECT_NOT_FOUND, `No project found at ${dir}.  Run \`ffclaw new\` first.`, opts);
   }
   if (err.code === 'INVALID_PROJECT') {
     error(Errors.INVALID_PROJECT, err.message, opts);

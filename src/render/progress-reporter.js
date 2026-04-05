@@ -1,5 +1,5 @@
 /**
- * Progress reporting module for ClipCraft renders.
+ * Progress reporting module for FFClaw renders.
  *
  * Wraps the core `progress()` helper from output.js with structured state
  * management, ETA calculation, speed estimation, and multi-output-mode

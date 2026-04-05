@@ -1,7 +1,7 @@
 /**
  * postinstall script — ensures FFCreator's own dependencies are installed.
  *
- * ClipCraft's package.json declares ffcreator as "file:./vendor/FFCreator".
+ * FFClaw's package.json declares ffcreator as "file:./vendor/FFCreator".
  * npm creates the symlink, but does NOT run FFCreator's own npm install.
  * This script bridges that gap.
  *
