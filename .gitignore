@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# macOS
+.DS_Store
+**/.DS_Store
+
+# Build / cache
+.ffclaw-cache/
+*.cache
+
+# Output files
+output/
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+
+# Logs
+*.log
+npm-debug.log*
+
+# Environment
+.env
+.env.*
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test artifacts
+coverage/
