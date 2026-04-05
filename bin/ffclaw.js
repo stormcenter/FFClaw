@@ -10,6 +10,11 @@ import { hideBin } from 'yargs/helpers';
 import newCmd from '../src/commands/new.js';
 import importCmd from '../src/commands/import.js';
 import timelineCmd from '../src/commands/timeline.js';
+import filterCmd from '../src/commands/filter.js';
+import textCmd from '../src/commands/text.js';
+import templateCmd from '../src/commands/template.js';
+import previewCmd from '../src/commands/preview.js';
+import queueCmd from '../src/commands/queue.js';
 import exportCmd from '../src/commands/export.js';
 
 yargs(hideBin(process.argv))
@@ -45,6 +50,11 @@ yargs(hideBin(process.argv))
   .command(newCmd)
   .command(importCmd)
   .command(timelineCmd)
+  .command(filterCmd)
+  .command(textCmd)
+  .command(templateCmd)
+  .command(previewCmd)
+  .command(queueCmd)
   .command(exportCmd)
   // ── Defaults ─────────────────────────────────────────────────────────────────
   .demandCommand(1, 'Please specify a command.')

@@ -66,7 +66,6 @@ export function builder(yargs) {
             description: 'Text clip ID to update (creates a new clip if omitted)',
           })
           .option('var', {
-            alias: 'v',
             type: 'string',
             description: 'Variable values as key=value pairs (can be repeated)',
           })
@@ -100,7 +99,6 @@ export function builder(yargs) {
         y
           .positional('name', { type: 'string', description: 'Template name' })
           .option('var', {
-            alias: 'v',
             type: 'string',
             description: 'Variable values as key=value pairs (can be repeated)',
           })
