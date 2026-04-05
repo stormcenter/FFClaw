@@ -1,0 +1,50 @@
+{
+  "name": "clipcraft",
+  "version": "0.1.0",
+  "description": "CLI video editor powered by FFCreator — the command-line剪映",
+  "type": "module",
+  "bin": {
+    "clipcraft": "./bin/clipcraft.js"
+  },
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "test": "node --experimental-vm-modules node_modules/.bin/jest",
+    "test:unit": "node --experimental-vm-modules node_modules/.bin/jest test/unit",
+    "test:integration": "node --experimental-vm-modules node_modules/.bin/jest test/integration",
+    "lint": "eslint src bin --ext .js"
+  },
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "write-file-atomic": "^5.0.1",
+    "yargs": "^17.7.2"
+  },
+  "peerDependencies": {
+    "ffcreator": "^8.0.0"
+  },
+  "peerDependenciesMeta": {
+    "ffcreator": {
+      "optional": false
+    }
+  },
+  "devDependencies": {
+    "jest": "^29.7.0"
+  },
+  "jest": {
+    "transform": {},
+    "extensionsToTreatAsEsm": [".js"],
+    "testEnvironment": "node"
+  },
+  "keywords": [
+    "video",
+    "cli",
+    "ffcreator",
+    "ffmpeg",
+    "editor"
+  ],
+  "license": "MIT"
+}
