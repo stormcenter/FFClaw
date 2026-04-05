@@ -125,14 +125,16 @@ async function handleAdd(argv, type) {
     handleLoadError(err, dir, opts);
   }
 
-  // Store path relative to project directory for portability
-  const filePath = path.isAbsolute(argv.file)
-    ? path.relative(dir, argv.file)
-    : argv.file;
+  // Resolve to absolute path for fs.access check, then store relative for portability
+  const absFilePath = path.isAbsolute(argv.file)
+    ? argv.file
+    : path.resolve(dir, argv.file);
 
   let id, entry;
   try {
-    ({ id, entry } = await addAsset(projectData, filePath, type, argv.ffmpeg));
+    ({ id, entry } = await addAsset(projectData, absFilePath, type, argv.ffmpeg));
+    // Convert stored path to relative for portability
+    entry.path = path.relative(dir, entry.path);
   } catch (err) {
     mapAssetError(err, opts);
   }

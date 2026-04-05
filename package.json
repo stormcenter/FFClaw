@@ -21,7 +21,11 @@
   },
   "dependencies": {
     "ajv": "^8.17.1",
+    "cross-spawn": "^7.0.6",
     "ffcreator": "file:./vendor/FFCreator",
+    "get-pixels": "^3.3.3",
+    "psl": "^1.15.0",
+    "request": "^2.88.2",
     "write-file-atomic": "^5.0.1",
     "yargs": "^17.7.2"
   },
@@ -31,7 +35,10 @@
   "jest": {
     "transform": {},
     "testEnvironment": "node",
-    "testPathIgnorePatterns": ["/node_modules/", "/vendor/"]
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/vendor/"
+    ]
   },
   "keywords": [
     "video",

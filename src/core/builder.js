@@ -14,7 +14,31 @@
  */
 
 import path from 'node:path';
-import FFCreator, { FFScene, FFVideo, FFImage, FFText, FFAudio } from 'ffcreator';
+
+// FFCreator is loaded lazily (dynamic import) so that commands which don't
+// render video (new, import, timeline show, …) can start without requiring
+// all of FFCreator's native dependencies to be installed.
+let _FFCreator, _FFScene, _FFVideo, _FFImage, _FFText, _FFAudio;
+async function loadFFCreator() {
+  if (_FFCreator) return;
+  // ffcreator is a CJS module; dynamic import wraps module.exports as .default
+  const mod = await import('ffcreator');
+  const pkg = mod.default ?? mod;
+  _FFCreator = pkg.FFCreator;
+  _FFScene   = pkg.FFScene;
+  _FFVideo   = pkg.FFVideo;
+  _FFImage   = pkg.FFImage;
+  _FFText    = pkg.FFText;
+  _FFAudio   = pkg.FFAudio;
+}
+
+// Proxy getters used inside synchronous helpers — call loadFFCreator() before build()
+const getFFCreator = () => _FFCreator;
+const getFFScene   = () => _FFScene;
+const getFFVideo   = () => _FFVideo;
+const getFFImage   = () => _FFImage;
+const getFFText    = () => _FFText;
+const getFFAudio   = () => _FFAudio;
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -53,14 +77,21 @@ function resolveAssetPath(asset, projectDir) {
 
 /**
  * Compute a clip's rendered duration on the timeline.
+ * Falls back to the asset's probed duration when no explicit range is set.
  *
  * @param {import('./timeline-model.js').VideoClip|import('./timeline-model.js').AudioClip} clip
+ * @param {import('./project.js').ProjectData} [projectData]  Used for asset-duration fallback
  * @returns {number}
  */
-function clipDuration(clip) {
+function clipDuration(clip, projectData) {
   if (clip.duration != null) return clip.duration;
   if (clip.out != null && clip.in != null) return (clip.out - clip.in) / (clip.speed ?? 1);
   if (clip.out != null) return clip.out / (clip.speed ?? 1);
+  // Fallback: use the asset's probed duration
+  if (projectData && clip.asset) {
+    const asset = projectData.assets[clip.asset];
+    if (asset?.duration != null) return asset.duration / (clip.speed ?? 1);
+  }
   return 0;
 }
 
@@ -98,9 +129,9 @@ function requireAsset(projectData, assetId, clipId) {
  */
 function buildVideoScene(clip, projectData, projectDir, transEffect, transDur) {
   const { width, height, bgColor } = projectData;
-  const sceneDur = clipDuration(clip);
+  const sceneDur = clipDuration(clip, projectData);
 
-  const scene = new FFScene();
+  const scene = new (getFFScene())();
   scene.setBgColor(bgColor);
   scene.setDuration(sceneDur);
 
@@ -112,13 +143,13 @@ function buildVideoScene(clip, projectData, projectDir, transEffect, transDur) {
   const assetPath = resolveAssetPath(asset, projectDir);
 
   if (clip.type === 'image') {
-    const img = new FFImage({ path: assetPath, x: width / 2, y: height / 2 });
+    const img = new (getFFImage())({ path: assetPath, x: width / 2, y: height / 2 });
     if (clip.animateIn)  img.addEffect(clip.animateIn,  0.5, 0);
     if (clip.animateOut) img.addEffect(clip.animateOut, 0.5, Math.max(0, sceneDur - 0.5));
     scene.addChild(img);
   } else {
     // type === 'video'
-    const ffvideo = new FFVideo({
+    const ffvideo = new (getFFVideo())({
       path:   assetPath,
       x:      width / 2,
       y:      height / 2,
@@ -169,7 +200,7 @@ function addTextClips(scene, textClips, sceneStart, sceneEnd, width, height) {
     const relEnd   = Math.min(sceneEnd - sceneStart, tcEnd - sceneStart);
     const relDur   = relEnd - relStart;
 
-    const fftext = new FFText({
+    const fftext = new (getFFText())({
       text:     tc.content ?? '',
       x:        width / 2,
       y:        Math.round(height * 0.85),
@@ -196,7 +227,7 @@ function addTextClips(scene, textClips, sceneStart, sceneEnd, width, height) {
  * @returns {FFScene}
  */
 function buildEmptyScene(bgColor, duration) {
-  const scene = new FFScene();
+  const scene = new (getFFScene())();
   scene.setBgColor(bgColor);
   scene.setDuration(Math.max(duration, 0.1));
   return scene;
@@ -215,9 +246,10 @@ function buildEmptyScene(bgColor, duration) {
  * @param {number}  [renderOpts.crf]           CRF value (0–51; lower = better quality)
  * @param {string}  [renderOpts.preset]        x264 preset (e.g. 'fast', 'slow')
  * @param {string}  [renderOpts.audioBitrate]  Audio bitrate (e.g. '192k')
- * @returns {FFCreator}
+ * @returns {Promise<FFCreator>}
  */
-export function build(model, projectData, projectDir, renderOpts = {}) {
+export async function build(model, projectData, projectDir, renderOpts = {}) {
+  await loadFFCreator();
   const timeline = model.toJSON();
   const { width, height, fps, bgColor } = projectData;
   const totalDuration = model.getDuration();
@@ -231,16 +263,24 @@ export function build(model, projectData, projectDir, renderOpts = {}) {
 
   // ── 1. Create FFCreator ────────────────────────────────────────────────────
 
-  const creator = new FFCreator({
+  const cacheDir = path.join(projectDir, '.ffclaw-cache');
+
+  const creator = new (getFFCreator())({
     width,
     height,
     fps,
     output,
     crf,
     preset,
-    audio: audioBitrate,
     bgColor,
+    cacheDir,
+    // Disable inkpaint's URL preloader — it hangs on local file:// paths.
+    // FFCreator's node preProcessing (ffprobe/ffmpeg frame extraction) still runs.
+    preload: false,
   });
+
+  // Set audio bitrate via FFmpeg output options
+  creator.setOutOptions(['-b:a', audioBitrate]);
 
   // ── 2. Build transition lookup: "clipId1:clipId2" → Transition ─────────────
 
@@ -277,7 +317,7 @@ export function build(model, projectData, projectDir, renderOpts = {}) {
 
       // Add text overlays that fall within this clip's time window
       const sceneStart = clip.start ?? 0;
-      const sceneEnd   = sceneStart + clipDuration(clip);
+      const sceneEnd   = sceneStart + clipDuration(clip, projectData);
       addTextClips(scene, timeline.text, sceneStart, sceneEnd, width, height);
 
       creator.addChild(scene);
@@ -289,9 +329,9 @@ export function build(model, projectData, projectDir, renderOpts = {}) {
   for (const audioClip of timeline.audio) {
     const asset     = requireAsset(projectData, audioClip.asset, audioClip.id);
     const assetPath = resolveAssetPath(asset, projectDir);
-    const dur       = clipDuration(audioClip);
+    const dur       = clipDuration(audioClip, projectData);
 
-    const ffaudio = new FFAudio({
+    const ffaudio = new (getFFAudio())({
       path:  assetPath,
       start: audioClip.start ?? 0,
       ...(dur  > 0           && { duration: dur }),

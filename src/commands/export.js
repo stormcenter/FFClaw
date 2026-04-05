@@ -58,7 +58,6 @@ export function builder(yargs) {
             demandOption: true,
           })
           .option('quality', {
-            alias: 'q',
             type: 'string',
             choices: ['high', 'medium', 'low'],
             description: 'Quality preset: high (crf=18,slow), medium (crf=23,medium), low (crf=28,fast)',
@@ -136,7 +135,7 @@ async function handleExport(argv) {
 
   let creator;
   try {
-    creator = build(model, projectData, dir, renderOpts);
+    creator = await build(model, projectData, dir, renderOpts);
   } catch (err) {
     mapBuildError(err, opts);
   }
