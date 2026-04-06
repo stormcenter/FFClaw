@@ -455,11 +455,11 @@ ffclaw transition preview fade        -o test/gl-transition-samples/fade.gif
 
 | 转场名 | 说明 | 效果预览 |
 |--------|------|----------|
-| `cross-zoom` | 交叉缩放 | [cross-zoom.gif](test/gl-transition-samples/cross-zoom.gif) |
-| `heart` | 心形展开 | [heart.gif](test/gl-transition-samples/heart.gif) |
-| `water-drop` | 水滴波纹 | [water-drop.gif](test/gl-transition-samples/water-drop.gif) |
-| `dreamy-zoom` | 梦幻缩放 | [dreamy-zoom.gif](test/gl-transition-samples/dreamy-zoom.gif) |
-| `fade` | 淡入淡出 | [fade.gif](test/gl-transition-samples/fade.gif) |
+| `cross-zoom` | 交叉缩放 | ![cross-zoom](test/gl-transition-samples/cross-zoom.gif) |
+| `heart` | 心形展开 | ![heart](test/gl-transition-samples/heart.gif) |
+| `water-drop` | 水滴波纹 | ![water-drop](test/gl-transition-samples/water-drop.gif) |
+| `dreamy-zoom` | 梦幻缩放 | ![dreamy-zoom](test/gl-transition-samples/dreamy-zoom.gif) |
+| `fade` | 淡入淡出 | ![fade](test/gl-transition-samples/fade.gif) |
 
 完整 121 种转场列表运行 `ffclaw transition list` 查看。
 
