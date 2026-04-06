@@ -25,6 +25,7 @@ import { load, resolveProjectDir } from '../core/project.js';
 import { TimelineModel } from '../core/timeline-model.js';
 import { build } from '../core/builder.js';
 import { run } from '../render/export-runner.js';
+import { renderWithFFmpeg, needsFFmpegPipeline } from '../render/ffmpeg-renderer.js';
 import { print, ok, error, Errors } from '../utils/output.js';
 
 const execFileAsync = promisify(execFile);
@@ -129,29 +130,44 @@ async function handleExport(argv) {
   const crf          = argv.crf          ?? qualityDefaults.crf          ?? 23;
   const preset       = argv.preset       ?? qualityDefaults.preset       ?? 'fast';
   const audioBitrate = argv['audio-bitrate'] ?? '192k';
+  const ffmpegBin    = argv.ffmpeg ?? 'ffmpeg';
   const output       = path.resolve(argv.output);
 
-  const renderOpts = { output, crf, preset, audioBitrate };
-
-  let creator;
-  try {
-    creator = await build(model, projectData, dir, renderOpts);
-  } catch (err) {
-    mapBuildError(err, opts);
-  }
+  const renderOpts = { output, crf, preset, audioBitrate, ffmpegBin };
 
   if (!opts.quiet && !opts.json) {
     print(`Exporting to ${output}  (crf=${crf} preset=${preset} audio=${audioBitrate})`, opts);
   }
 
   let outputPath;
-  try {
-    outputPath = await run(creator, opts);
-  } catch (err) {
-    if (err.code === 'RENDER_ERROR') {
-      error(Errors.RENDER_ERROR, err.message, opts);
+
+  if (needsFFmpegPipeline(model)) {
+    // ── FFmpeg pipeline: used when gl: transitions are present ─────────────
+    try {
+      outputPath = await renderWithFFmpeg(model, projectData, dir, renderOpts, opts);
+    } catch (err) {
+      if (err.code === 'RENDER_ERROR') {
+        error(Errors.RENDER_ERROR, err.message, opts);
+      }
+      throw err;
     }
-    throw err;
+  } else {
+    // ── FFCreator pipeline: used for standard timelines ────────────────────
+    let creator;
+    try {
+      creator = await build(model, projectData, dir, renderOpts);
+    } catch (err) {
+      mapBuildError(err, opts);
+    }
+
+    try {
+      outputPath = await run(creator, opts);
+    } catch (err) {
+      if (err.code === 'RENDER_ERROR') {
+        error(Errors.RENDER_ERROR, err.message, opts);
+      }
+      throw err;
+    }
   }
 
   ok({ op: 'export', output: outputPath ?? output, crf, preset, audioBitrate }, opts);
