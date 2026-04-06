@@ -172,6 +172,15 @@ test/fixtures/assets/
 | TAT-04 | 无效转场类型 | `--type invalid_trans` | 报错 UNKNOWN_TRANSITION |
 | TAT-05 | duration 超范围 | `--duration 999` | 报错 INVALID_DURATION |
 
+#### 3.3.7.5 `timeline add-transition` (GL Transition)
+
+| Case ID | 描述 | 输入 | 预期结果 |
+|---------|------|------|----------|
+| TAT-GL-01 | 添加 GL 转场 | `add-transition gl:cross-zoom --between c1 c2 --duration 1.0` | transitions 包含 `{"between":["c1","c2"],"effect":"gl:cross-zoom"}` |
+| TAT-GL-02 | 无效 GL 转场名 | `add-transition gl:does-not-exist` | 报错 UNKNOWN_TRANSITION |
+| TAT-GL-03 | GL 转场带参数 | `add-transition gl:bounce --params '{"bounces":5}'` | params 字段正确存储 |
+| TAT-GL-04 | camelCase 输入 | `add-transition gl:crossZoom` | 正确识别为 cross-zoom |
+
 #### 3.3.8.5 `timeline transitions list`
 
 | Case ID | 描述 | 输入 | 预期结果 |
@@ -214,7 +223,18 @@ test/fixtures/assets/
 | TFD-02 | 只淡入 | `--in 2` | fadeIn=2, fadeOut=0 |
 | TFD-03 | 淡出时长超过 clip 时长 | `--out 999` | 报错 INVALID_FADE |
 
-### 3.4 `filter` 命令
+### 3.4 `transition` 命令
+
+| Case ID | 描述 | 输入 | 预期结果 |
+|---------|------|------|----------|
+| TRAN-01 | 列出全部转场 | `transition list` | 输出 121 种 GL 转场列表 |
+| TRAN-02 | 查看转场参数 | `transition list-params cross-zoom` | 输出 strength 参数信息 |
+| TRAN-03 | 预览转场帧 | `transition preview cross-zoom --from a.jpg --to b.jpg --output p.png` | 生成单帧 PNG |
+| TRAN-04 | 渲染转场视频 | `transition render cross-zoom --from a.jpg --to b.jpg --duration 1 --output out.mp4` | 生成 MP4 文件 |
+| TRAN-05 | 无效转场名 | `transition render doesnotexist` | 报错 UNKNOWN_TRANSITION |
+| TRAN-06 | 缺失必要参数 | `transition render cross-zoom --from a.jpg` | 报错 MISSING_REQUIRED_PARAM |
+
+### 3.5 `filter` 命令
 
 | Case ID | 描述 | 输入 | 预期结果 |
 |---------|------|------|---------|
@@ -385,6 +405,16 @@ test/fixtures/assets/
 | REP-UT-04 | --json 模式切换 | enableJSON(true) 后 | 所有输出变为 JSON 格式 |
 | REP-UT-05 | ETA 计算 | 已知 frame/totalFrames/fps | 正确计算剩余时间 |
 
+### 4.9 transitions/gl-renderer.js
+
+| Case ID | 描述 | 输入 | 预期结果 |
+|---------|------|------|----------|
+| GLR-UT-01 | 渲染转场视频 | render(from, to, 'cross-zoom', 1.0, outPath) | 生成 MP4，时长约 5s |
+| GLR-UT-02 | WebGL context 创建 | new GLTransitionRenderer() | gl context 非空 |
+| GLR-UT-03 | 不存在的转场 | render(..., 'doesnotexist', ...) | 抛出错误 |
+| GLR-UT-04 | sampler2D 参数 | render with luma transition | 使用默认噪声纹理 |
+| GLR-UT-05 | renderFrame 单帧 | renderFrame(from, to, 'cross-zoom', 0.5) | 返回 PNG Buffer |
+
 ---
 
 ## 5. 端到端测试用例
@@ -401,6 +431,8 @@ test/fixtures/assets/
 | E2E-06 | 模板使用工作流 | template use → export | 变量替换正确，结果符合预期 |
 | E2E-07 | 变速剪辑 | speed 2.0 → export | 导出视频速度为原视频 2x |
 | E2E-08 | 音频淡入淡出 | fade → export | 音频开头/结尾有淡入淡出效果 |
+| E2E-GL-01 | GL 转场 E2E | new → import 2 images → timeline add → add-transition gl:cross-zoom → export | 导出 MP4 包含 GL 转场效果 |
+| E2E-GL-02 | 批量渲染 GL 转场 | queue render with GL transitions | 所有任务完成 |
 
 ### 5.2 边界条件测试
 

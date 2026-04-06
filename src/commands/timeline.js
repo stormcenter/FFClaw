@@ -189,7 +189,7 @@ export function builder(yargs) {
           .option('effect', {
             alias: 'e',
             type: 'string',
-            description: 'Transition effect (e.g. fade, wipe, dissolve)',
+            description: 'Transition effect (e.g. fade, wipe, gl:cross-zoom)',
             default: 'fade',
           })
           .option('duration', {
@@ -198,7 +198,12 @@ export function builder(yargs) {
             description: 'Transition duration in seconds',
             default: 0.5,
           })
-          .example('$0 timeline add-transition c1 c2 --effect wipe --duration 1', 'Add wipe transition'),
+          .option('params', {
+            type: 'string',
+            description: 'GL Transition params as key=value,key=value (e.g. strength=0.8,amplitude=2.0)',
+          })
+          .example('$0 timeline add-transition c1 c2 --effect wipe --duration 1', 'Add wipe transition')
+          .example('$0 timeline add-transition c1 c2 --effect gl:cross-zoom --params strength=0.8', 'Add GL transition with params'),
       handler: handleAddTransition,
     })
     // ── timeline transitions ──────────────────────────────────────────────────
@@ -455,6 +460,16 @@ async function handleAddTransition(argv) {
   const opts = { json: argv.json, quiet: argv.quiet };
   const dir  = resolveProjectDir(argv.project);
 
+  // Parse --params if provided
+  let params = undefined;
+  if (argv.params) {
+    try {
+      params = parseTransitionParams(argv.params);
+    } catch (err) {
+      error(Errors.TRANSITION_INVALID_PARAMS.replace('{name}', argv.effect).replace('{reason}', err.message), err.message, opts);
+    }
+  }
+
   const projectData = await loadProject(dir, opts);
   const model = new TimelineModel(projectData.timeline);
 
@@ -463,6 +478,7 @@ async function handleAddTransition(argv) {
     ({ id } = model.addTransition(argv.clip1, argv.clip2, {
       type:     argv.effect,
       duration: argv.duration,
+      params,
     }));
   } catch (err) {
     mapModelError(err, opts);
@@ -478,8 +494,70 @@ async function handleAddTransition(argv) {
     clipId:   id,
     effect:   argv.effect,
     duration: argv.duration,
+    params:   params ?? null,
     between:  [argv.clip1, argv.clip2],
   }, opts);
+}
+
+/**
+ * Parse a comma-separated list of key=value pairs into an object.
+ * Handles float, int, bool, vec2, vec3, vec4 values.
+ * @param {string} str  e.g. "strength=0.8,amplitude=2.0,direction=[1,0]"
+ * @returns {Record<string, any>}
+ */
+function parseTransitionParams(str) {
+  const result = {};
+  const parts = str.split(',').map((p) => p.trim()).filter(Boolean);
+  for (const part of parts) {
+    const eqIdx = part.indexOf('=');
+    if (eqIdx === -1) throw new Error(`Invalid param '${part}': missing '='`);
+    const key   = part.slice(0, eqIdx).trim();
+    const value = part.slice(eqIdx + 1).trim();
+    if (!key) throw new Error(`Invalid param: empty key in '${part}'`);
+    result[key] = parseParamValue(value);
+  }
+  return result;
+}
+
+/**
+ * Parse a parameter value string into the appropriate JS type.
+ * Handles: booleans, integers, floats, arrays [x,y], [r,g,b], [r,g,b,a], and hex colors.
+ * @param {string} v
+ * @returns {any}
+ */
+function parseParamValue(v) {
+  // Boolean
+  if (v === 'true')  return true;
+  if (v === 'false') return false;
+
+  // Integer
+  if (/^-?\d+$/.test(v)) return parseInt(v, 10);
+
+  // Float
+  if (/^-?\d*\.\d+$/.test(v)) return parseFloat(v);
+
+  // Array: [a, b, c, d]
+  if (v.startsWith('[')) {
+    const inner = v.replace(/^\[|\]$/g, '').trim();
+    if (!inner) return [];
+    const items = inner.split(',').map((s) => s.trim());
+    // Try to parse each item
+    const parsed = items.map((s) => {
+      if (/^-?\d+$/.test(s))       return parseInt(s, 10);
+      if (/^-?\d*\.\d+$/.test(s)) return parseFloat(s);
+      return parseParamValue(s); // nested
+    });
+    return parsed;
+  }
+
+  // Hex color: #rgb or #rrggbb or #rrggbbaa
+  if (v.startsWith('#')) return v;
+
+  // Plain float without decimal (e.g. "3")
+  const asFloat = parseFloat(v);
+  if (!isNaN(asFloat)) return asFloat;
+
+  return v; // fallback to string
 }
 
 /** Handle `timeline transitions` */

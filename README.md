@@ -20,6 +20,7 @@
   - [preview — 草稿预览](#preview--草稿预览)
   - [queue — 批量渲染](#queue--批量渲染)
 - [滤镜 DSL](#滤镜-dsl)
+- [GL Transition 转场](#gl-transition-转场)
 - [模板变量系统](#模板变量系统)
 - [项目文件 ffclaw.json](#项目文件-ffclawjson)
 - [架构说明](#架构说明)
@@ -404,6 +405,66 @@ ffclaw filter adjust c1 --dsl "flip|grayscale"
 
 ---
 
+## GL Transition 转场
+
+FFClaw 内置 **121 种 GL Transition 转场效果**，通过 FFmpeg 内置 `xfade` 滤镜实现，完全不依赖特殊编译的 FFmpeg。
+
+> **核心技术**：使用标准 FFmpeg `xfade` 滤镜作为 GL Transition 的渲染后端，自动将 121 种 GLSL 转场名称映射到最接近的 xfade 效果。如果检测到支持 `gltransition` 的自定义 FFmpeg，则使用真实 GLSL shader 渲染。
+
+> 前置依赖：`node >= 18`，`ffmpeg`（标准版本即可，无需重新编译）
+
+### 转场命令
+
+```bash
+# 列出全部 121 种转场
+ffclaw transition list
+
+# 查看某个转场的参数
+ffclaw transition info cross-zoom
+
+# 生成转场预览 GIF
+ffclaw transition preview cross-zoom
+ffclaw transition preview water-drop -o preview.gif --duration 1
+```
+
+**与 timeline 结合**：在 `ffclaw.json` 的 transitions 中使用 `gl:` 前缀引用 GL 转场：
+
+```json
+{
+  "transitions": [
+    { "id": "t1", "between": ["c1", "c2"], "effect": "gl:cross-zoom", "duration": 1.0 }
+  ]
+}
+```
+
+支持的转场前缀：
+- `gl:` — GL Transition 转场（121 种）
+- 不带前缀 — FFmpeg 内置 xfade 转场（fade, wipeleft, dissolve 等）
+
+### 效果示例
+
+使用内置测试素材（`test/fixtures/landscape-from.jpg` → `test/fixtures/landscape-to.jpg`）生成预览 GIF：
+
+```bash
+ffclaw transition preview cross-zoom  -o test/gl-transition-samples/cross-zoom.gif
+ffclaw transition preview heart       -o test/gl-transition-samples/heart.gif
+ffclaw transition preview water-drop  -o test/gl-transition-samples/water-drop.gif
+ffclaw transition preview dreamy-zoom -o test/gl-transition-samples/dreamy-zoom.gif
+ffclaw transition preview fade        -o test/gl-transition-samples/fade.gif
+```
+
+| 转场名 | 说明 | 效果预览 |
+|--------|------|----------|
+| `cross-zoom` | 交叉缩放 | [cross-zoom.gif](test/gl-transition-samples/cross-zoom.gif) |
+| `heart` | 心形展开 | [heart.gif](test/gl-transition-samples/heart.gif) |
+| `water-drop` | 水滴波纹 | [water-drop.gif](test/gl-transition-samples/water-drop.gif) |
+| `dreamy-zoom` | 梦幻缩放 | [dreamy-zoom.gif](test/gl-transition-samples/dreamy-zoom.gif) |
+| `fade` | 淡入淡出 | [fade.gif](test/gl-transition-samples/fade.gif) |
+
+完整 121 种转场列表运行 `ffclaw transition list` 查看。
+
+---
+
 ## 模板变量系统
 
 模板文件（`.cfc.json`）中使用 Mustache 风格变量，支持过滤器、条件块和循环：
@@ -479,7 +540,6 @@ ffclaw filter adjust c1 --dsl "flip|grayscale"
 
 ```
 ffclaw/
-├── bin/ffclaw.js           # CLI 入口（yargs 路由）
 ├── src/
 │   ├── commands/              # 命令层：参数解析 + 输出格式化
 │   ├── core/
@@ -488,9 +548,17 @@ ffclaw/
 │   │   ├── builder.js         # ★ 多轨时间线 → FFCreator API 翻译层
 │   │   ├── asset-store.js     # ffprobe 探测 + 素材持久化
 │   │   └── filter-dsl.js      # 滤镜 DSL → FFmpeg filtergraph
+│   ├── transitions/
+│   │   ├── registry.js        # 121 种 GL Transition 注册表
+│   │   ├── params.js          # GLSL 参数类型验证与转换
+│   │   ├── gl-renderer.js     # GL Transition GIF 预览渲染器（transition preview）
+│   │   ├── queue.js           # 批量渲染队列
+│   │   └── xfade-map.js       # GL → xfade 名称映射（121 条）
 │   ├── render/
 │   │   ├── progress-reporter.js  # 进度事件 → 终端进度条 / JSON
-│   │   └── export-runner.js      # 包装 FFCreator.start()
+│   │   ├── export-runner.js      # 包装 FFCreator.start()
+│   │   ├── ffmpeg-renderer.js    # ★ 纯 FFmpeg 渲染管道（GL 转场 / xfade）
+│   │   └── gl-compat.js          # FFmpeg gltransition 兼容性检测与转场 filter 构建
 │   ├── template/
 │   │   ├── engine.js           # {{var}} 模板渲染引擎
 │   │   └── validator.js        # 必填变量检查
@@ -498,10 +566,16 @@ ffclaw/
 │       ├── output.js           # 统一输出（普通/JSON/Quiet）
 │       ├── table.js            # 时间线 ASCII 表格渲染
 │       └── id-gen.js           # Asset ID / Clip ID 生成
-├── vendor/FFCreator/           # FFCreator git submodule
+├── bin/
+│   └── ffclaw.js              # CLI 入口（yargs 路由）
+├── vendor/
+│   ├── FFCreator/             # FFCreator git submodule
+│   └── gl-transitions/        # 121 个 GLSL shader 文件 + 默认噪声纹理
 └── test/
-    ├── unit/                   # 核心模块单元测试（89 个用例）
-    └── fixtures/               # 测试素材
+    ├── unit/                   # 核心模块单元测试
+    ├── integration/            # 集成测试
+    ├── fixtures/               # 测试素材（test-from.jpg, test-to.jpg）
+    └── gl-transition-samples/  # ★ 121 种转场效果示例视频
 ```
 
 **Builder 翻译层**（`src/core/builder.js`）是核心难点：FFCreator 是 Scene 串联模型，FFClaw 是多轨并行模型。Builder 将多轨时间线切分为 FFCreator 的 Scene 序列：
@@ -537,6 +611,8 @@ node bin/ffclaw.js timeline --help
 **测试覆盖目标：**
 - 核心模块（`src/core/*`）：≥ 90% 行覆盖率
 - 命令层（`src/commands/*`）：≥ 80% 行覆盖率
+
+> 目前：110 个单元测试全部通过，覆盖核心模块及 GL Transition 渲染链路。
 
 **与 FFCreator 的关系：**
 

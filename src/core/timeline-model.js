@@ -15,6 +15,8 @@
  */
 
 import { nextClipId } from './id-gen.js';
+import { getGLTransition } from '../transitions/registry.js';
+import { validateParams } from '../transitions/params.js';
 
 // ── Type definitions ──────────────────────────────────────────────────────────
 
@@ -70,9 +72,10 @@ import { nextClipId } from './id-gen.js';
 /**
  * @typedef {object} Transition
  * @property {string} id          e.g. 't1'
- * @property {string} effect      e.g. 'fade', 'wipe', 'dissolve'
+ * @property {string} effect      e.g. 'fade', 'wipe', 'dissolve', 'gl:cross-zoom'
  * @property {number} [duration]  Transition duration in seconds (default 0.5)
  * @property {[string, string]} between  [clipId1, clipId2]
+ * @property {Record<string,any>} [params]  GL Transition parameters
  */
 
 /**
@@ -365,7 +368,7 @@ export class TimelineModel {
    *
    * @param {string} clipId1
    * @param {string} clipId2
-   * @param {{ effect?: string, duration?: number }} [opts]
+   * @param {{ effect?: string, duration?: number, params?: Record<string,any> }} [opts]
    * @returns {{ id: string }}  The new transition ID.
    */
   addTransition(clipId1, clipId2, opts = {}) {
@@ -381,13 +384,35 @@ export class TimelineModel {
       e.code = 'CLIP_NOT_FOUND';
       throw e;
     }
+
+    // Validate GL Transition params if this is a gl: effect
+    const effect = opts.type ?? 'fade';
+    if (effect.startsWith('gl:')) {
+      const name = effect.slice(3);
+      const gl   = getGLTransition(name);
+      if (!gl) {
+        const e = new Error(`GL Transition '${name}' not found in registry`);
+        e.code = 'TRANSITION_GLSL_NOT_FOUND';
+        throw e;
+      }
+      if (gl.params && gl.params.length > 0 && opts.params) {
+        const errors = validateParams(opts.params, gl.params);
+        if (errors.length > 0) {
+          const e = new Error(`Invalid parameters: ${errors.join('; ')}`);
+          e.code = 'TRANSITION_INVALID_PARAMS';
+          throw e;
+        }
+      }
+    }
+
     const id = nextTransitionId(this._data.transitions);
     /** @type {Transition} */
     const transition = {
       id,
-      type:     opts.type     ?? 'fade',
+      type:     effect,
       duration: opts.duration ?? 0.5,
       between:  [clipId1, clipId2],
+      ...(opts.params && Object.keys(opts.params).length > 0 && { params: opts.params }),
     };
     this._data.transitions.push(transition);
     return { id };

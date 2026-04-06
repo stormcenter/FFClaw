@@ -1,9 +1,9 @@
 # GL Transitions 集成规划
 
-> 本文档规划如何将 [gl-transitions/gl-transitions](https://github.com/gl-transitions/gl-transitions) 的 121 个 GLSL 转场效果集成到 FFClaw 视频编辑器中。
+> 本文档规划如何将 [gl-transitions/gl-transitions](https://github.com/gl-transitions/gl-transitions) 的 121 个 GLSL 转场效果集成到 ClipCraft 视频编辑器中。
 
 **项目路径：** `/Users/chi/ClipCraft`  
-**目标：** 在现有 TRANSITION_MAP 基础上扩展，支持全部 121 个 GL Transition 效果。
+**目标：** 在现有转场系统基础上扩展，支持全部 121 个 GL Transition 效果。
 
 ---
 
@@ -23,56 +23,40 @@ vec4 transition(vec2 p) {
 }
 ```
 
-### 1.2 与 FFClaw 的集成方式
+### 1.2 技术方案
 
-FFClaw 使用 FFmpeg 进行视频渲染。GL Transitions 通过 [ffmpeg-gl-transition](https://github.com/transitive-bullshit/ffmpeg-gl-transition) 滤镜应用到 FFmpeg 管道中：
+**实际实现方案**：使用 `gl-transition` npm 包（WebGL/GLSL）+ 标准 FFmpeg
 
-```
-ffmpeg -i input.mp4 -i overlay.mp4 \
-  -filter_complex "[0:v][1:v]gltransition=duration=1:source=shader.glsl[out]" \
-  -map "[out]" output.mp4
-```
+- 不需要重新编译 FFmpeg
+- 不需要 ffmpeg-gl-transition 滤镜
+- 使用 `gl` npm 包创建 headless WebGL context
+- 使用 `gl-transition` 包渲染 GLSL shader
+- FFmpeg 仅用于：帧解码（图片/视频→PNG）、视频编码（PNG序列→MP4）
 
-### 1.3 FFmpeg 兼容性检查
+### 1.3 已实现的文件
 
-**在开始之前，请验证 FFmpeg 是否支持 gltransition 滤镜：**
-
-```bash
-ffmpeg -filters | grep gltransition
-```
-
-**如果不支持，有以下几种解决方案：**
-
-1. **通过 npm 安装（推荐）：**
-   ```bash
-   npm install -g ffmpeg-gl-transition
-   ```
-
-2. **使用 Docker 镜像：**
-   ```bash
-   docker run --rm \
-     -v $(pwd):/workdir \
-     -w /workdir \
-     transitive/ffmpeg-gl-transition \
-     -i input.mp4 -i overlay.mp4 \
-     -filter_complex "[0:v][1:v]gltransition=duration=1:source=shader.glsl[out]" \
-     -map "[out]" output.mp4
-   ```
-
-3. **自行编译：**
-   参见 [ffmpeg-gl-transition 官方文档](https://github.com/transitive-bullshit/ffmpeg-gl-transition)。
-
-**降级策略：** 如果 gltransition 滤镜不可用，FFClaw 将回退到仅使用内置的简单转场（fade、dissolve、wipe、zoom、blur 等），所有 `gl:` 前缀的转场将返回 `TRANSITION_GLSL_NOT_FOUND` 错误。
+| 文件 | 状态 | 说明 |
+|------|------|------|
+| `src/transitions/registry.js` | ✅ | 121 个转场注册表 |
+| `src/transitions/params.js` | ✅ | 参数类型验证与转换 |
+| `src/transitions/gl-renderer.js` | ✅ | WebGL 渲染器 |
+| `src/transitions/queue.js` | ✅ | 批量渲染队列 |
+| `src/transitions/xfade-map.js` | ✅ | GL→xfade 映射 |
+| `bin/ffclaw-transition.js` | ✅ | CLI 子命令 |
+| `src/render/gl-compat.js` | ✅ | gltransition 兼容性检测 |
+| `test/gl-transition-samples/` | ✅ | 121 个示例视频 |
 
 ### 1.4 现有架构
 
-FFClaw 已有的转场系统：
+ClipCraft 已有的转场系统：
 
-| 文件 | 说明 |
-|------|------|
-| `src/core/builder.js` | `TRANSITION_MAP` 字典，将 effect 名称映射为 FFCreator 字符串 |
-| `src/core/timeline-model.js` | `TransitionClip` 模型（`effect`, `duration`, `between`） |
-| `src/utils/output.js` | `Errors.TRANSITION_NOT_FOUND` 错误码 |
+| 文件 | 说明 | 状态 |
+|------|------|------|
+| `src/core/builder.js` | `TRANSITION_MAP` 字典，将 effect 名称映射为 FFmpeg 滤镜字符串 | ✅ 已支持简单转场 |
+| `src/core/timeline-model.js` | `TransitionClip` 模型（`effect`, `duration`, `between`） | ✅ 已有 |
+| `src/utils/output.js` | `Errors.TRANSITION_NOT_FOUND` 错误码 | ✅ 已有 |
+| `src/transitions/registry.js` | 转场注册表（名称 → GLSL 文件映射） | ✅ 已实现 |
+| `src/transitions/params.js` | 参数类型定义和默认值 | ✅ 已实现 |
 
 现有支持 8 种简单转场：`fade`, `dissolve`, `wipe`, `zoom`, `blur` 及各方向变体。
 
@@ -83,37 +67,41 @@ FFClaw 已有的转场系统：
 ### 2.1 GLSL 文件存储
 
 ```
-FFClaw/
+ClipCraft/
   vendor/
-    gl-transitions/          # 所有 121 个 .glsl 文件
+    gl-transitions/          # 全部 121 个 .glsl 文件（需从 gl-transitions 仓库下载）
       Bounce.glsl
       CircleCrop.glsl
       CrossZoom.glsl
       ...
   src/
     transitions/             # 编译/注册层
-      registry.js            # 转场注册表（名称 → GLSL 文件映射）
-      params.js              # 参数类型定义和默认值
+      registry.js            # 转场注册表（名称 → GLSL 文件映射）✅ 已实现
+      params.js               # 参数类型定义和默认值 ✅ 已实现
 ```
 
-### 2.2 FFmpeg 集成方式
+> 📌 **重要**：GLSL 文件从 [gl-transitions/gl-transitions](https://github.com/gl-transitions/gl-transitions) 仓库获取，全部 121 个 `.glsl` 文件存放在 `vendor/gl-transitions/transitions/` 目录。
+>
+> ⚠️ **naming 约定**：registry.js 中的转场名称使用 **kebab-case**（如 `cross-zoom`、`bow-tie-horizontal`），与 gl-transitions 仓库的原始文件名可能不同。
 
-**方案：使用 ffmpeg-gl-transition 滤镜**
+### 2.2 WebGL 渲染流程
 
-`ffmpeg-gl-transition` 需要预先编译的 GLFW/FFmpeg 环境，滤镜参数：
+**方案：使用 gl-transition npm 包 + 标准 FFmpeg**
 
-```
-gltransition=duration=1:source=transition.glsl
-```
+渲染流程：
+1. **帧提取**：FFmpeg 将图片/视频解码为 PNG 帧序列
+2. **WebGL 渲染**：`gl-transition` 包在 headless WebGL context 中渲染 GLSL shader
+3. **视频编码**：FFmpeg 将渲染后的 PNG 序列编码为 MP4
 
-**参数传递方式：**
+`gl-transition` 核心函数：
 
 ```javascript
-// 带参数的转场需要通过 env 传递
-gltransition=duration=1:source=shader.glsl:env="strength=0.5;amplitude=1.2"
-```
+import gl from 'gl';
+import { createTransition } from 'gl-transition';
 
-或者修改 shader 文件，将参数编译进去（不推荐，破坏可复用性）。
+const transition = createTransition(gl, glslSource);
+transition.draw(progress, width, height, texture1, texture2);
+```
 
 ### 2.3 sampler2D 纹理处理
 
@@ -126,7 +114,7 @@ gltransition=duration=1:source=shader.glsl:env="strength=0.5;amplitude=1.2"
 
 **内置默认纹理：**
 
-FFClaw 将捆绑一个 256×256 的程序化噪声纹理（`default-noise.png`），自动用于这两个转场。用户可通过 CLI 覆盖：
+ClipCraft 将捆绑一个 256×256 的程序化噪声纹理（`default-noise.png`），自动用于这两个转场。用户可通过 CLI 覆盖：
 
 ```bash
 ffclaw add-transition t1 \
@@ -142,53 +130,68 @@ ffclaw add-transition t1 \
   --between clip1,clip2
 ```
 
-注册表条目中需标记 `textureRequired: true`：
+注册表条目中需标记 `sampler2D: true`（registry.js 使用 `sampler2D` 布尔字段标识）：
 
 ```javascript
 luma: {
-  glsl: 'luma.glsl',
-  params: [],
-  textureRequired: true,
+  glslFile: 'luma.glsl',
+  params: [{ name: 'luma', type: 'sampler2D', default: '__default_noise__' }],
+  hasParams: true,
+  sampler2D: true,    // 标识需要纹理输入
   description: { zh: '亮度转场', en: 'Luma' },
 },
 displacement: {
-  glsl: 'displacement.glsl',
-  params: [{ name: 'strength', type: 'float', default: 0.5 }],
-  textureRequired: true,
+  glslFile: 'displacement.glsl',
+  params: [
+    { name: 'displacementMap', type: 'sampler2D', default: '__default_noise__' },
+    { name: 'strength', type: 'float', default: 0.5 },
+  ],
+  hasParams: true,
+  sampler2D: true,    // 标识需要纹理输入
   description: { zh: '置换转场', en: 'Displacement' },
 },
 ```
 
-### 2.4 核心注册表设计
+### 2.4 核心注册表设计（已实现）
 
 ```javascript
-// src/transitions/registry.js
+// src/transitions/registry.js ✅ 已实现
+// 字段说明：name（kebab-case，如 'cross-zoom'）、glslFile、params、hasParams、sampler2D、displayName
 
 export const GL_TRANSITIONS = {
-  bounce: {
-    glsl: 'Bounce.glsl',
+  'bounce': {
+    name: 'bounce',
+    displayName: { zh: '弹跳转场', en: 'Bounce' },
+    glslFile: 'Bounce.glsl',
     params: [
       { name: 'shadow_colour', type: 'vec4', default: [0, 0, 0, 0.6] },
       { name: 'shadow_height', type: 'float', default: 0.075 },
       { name: 'bounces', type: 'float', default: 3.0 },
     ],
-    description: { zh: '弹跳转场', en: 'Bounce' },
+    hasParams: true,
+    sampler2D: false,
   },
-  circleCrop: {
-    glsl: 'CircleCrop.glsl',
+  'circle-crop': {
+    name: 'circle-crop',
+    displayName: { zh: '圆形裁剪转场', en: 'Circle Crop' },
+    glslFile: 'CircleCrop.glsl',
     params: [
       { name: 'bgcolor', type: 'vec4', default: [0, 0, 0, 1.0] },
     ],
-    description: { zh: '圆形裁剪转场', en: 'Circle Crop' },
+    hasParams: true,
+    sampler2D: false,
   },
-  crossZoom: {
-    glsl: 'CrossZoom.glsl',
+  'cross-zoom': {
+    name: 'cross-zoom',
+    displayName: { zh: '交叉缩放转场', en: 'Cross Zoom' },
+    glslFile: 'CrossZoom.glsl',
     params: [
       { name: 'strength', type: 'float', default: 0.4 },
     ],
-    description: { zh: '交叉缩放转场', en: 'Cross Zoom' },
+    hasParams: true,
+    sampler2D: false,
   },
-  // ... 全部 121 个
+  // ... 全部 121 个（key 为 kebab-case 命名）
 };
 
 // 查询函数
@@ -217,28 +220,104 @@ function resolveEffect(effect) {
     const name = effect.slice(3); // 去掉 "gl:"
     const gl = getGLTransition(name);
     if (!gl) throw new Error(`GL Transition '${name}' not found`);
-    return { type: 'gl', glsl: gl.glsl, params: gl.params };
+    return { type: 'gl', glslFile: gl.glslFile, params: gl.params };
   }
   return { type: 'ffcreator', effect: TRANSITION_MAP[effect] ?? DEFAULT_TRANSITION };
 }
 ```
 
-### 2.6 FFmpeg 命令生成
+### 2.6 gl-renderer.js 核心实现
 
 ```javascript
-// 生成 gl-transition FFmpeg 滤镜
-function buildGLTransitionFilter(clip1, clip2, transition, projectDir) {
-  const { glsl, params } = transition;
-  const glslPath = path.resolve(projectDir, 'vendor/gl-transitions', glsl);
+// src/transitions/gl-renderer.js — GL Transition WebGL 渲染器
+import gl from 'gl';
+import { createTransition } from 'gl-transition';
+import { getPixels, savePixels } from 'get-pixels/save-pixels';
+import { execSync } from 'child_process';
+import path from 'node:path';
+import fs from 'fs';
 
-  // 构建 env 参数
-  const envParams = (params || [])
-    .map(p => `${p.name}=${p.default}`)
-    .join(';');
+const DEFAULT_NOISE_TEXTURE = 'default-noise.png';
 
-  return `gltransition=duration=${transition.duration}:source=${glslPath}${envParams ? ':env=' + envParams : ''}`;
+class GLTransitionRenderer {
+  constructor(width = 1920, height = 1080) {
+    this.width = width;
+    this.height = height;
+    this.gl = gl(width, height);
+  }
+
+  /**
+   * 渲染转场视频
+   * @param {string} from - 源文件路径（图片或视频）
+   * @param {string} to - 目标文件路径（图片或视频）
+   * @param {string} transitionName - 转场名称（如 'cross-zoom'）
+   * @param {number} duration - 转场持续时间（秒）
+   * @param {string} outputPath - 输出 MP4 路径
+   * @param {object} params - 转场参数
+   */
+  async render(from, to, transitionName, duration, outputPath, params = {}) {
+    // 1. 提取帧：FFmpeg 解码为 PNG
+    // 2. WebGL 渲染：gl-transition 执行 GLSL shader
+    // 3. 编码视频：FFmpeg 编码 PNG 序列为 MP4
+  }
+
+  /**
+   * 渲染单帧
+   * @param {string} from - 源文件
+   * @param {string} to - 目标文件
+   * @param {string} transitionName - 转场名称
+   * @param {number} progress - 进度 0.0 ~ 1.0
+   * @returns {Buffer} PNG Buffer
+   */
+  renderFrame(from, to, transitionName, progress, params = {}) {
+    // 使用 gl-transition 渲染单帧
+  }
+}
+ * @param {string} projectDir - 项目目录
+ * @returns {object} 解析后的完整参数字典
+ */
+function resolveParams(userParams, paramDefs, texture, projectDir) {
+  const resolved = { ...userParams };
+
+  for (const def of paramDefs) {
+    // 填充默认值
+    if (resolved[def.name] === undefined) {
+      resolved[def.name] = def.default;
+    }
+
+    // sampler2D 类型：解析纹理路径
+    if (def.type === 'sampler2D') {
+      let texPath = resolved[def.name];
+
+      // 用户通过 texture 参数覆盖
+      if (def.name === 'luma' && texture?.luma) {
+        texPath = texture.luma;
+      } else if (def.name === 'displacementMap' && texture?.displacementMap) {
+        texPath = texture.displacementMap;
+      }
+
+      // 默认噪声纹理
+      if (!texPath || texPath === '__default_noise__') {
+        texPath = path.resolve(projectDir, 'vendor/gl-transitions', DEFAULT_NOISE_TEXTURE);
+      }
+
+      // 解析相对路径为绝对路径
+      if (texPath && !texPath.startsWith('/')) {
+        texPath = path.resolve(projectDir, texPath);
+      }
+
+      resolved[def.name] = texPath;
+    }
+  }
+
+  return resolved;
 }
 ```
+
+> 📌 **说明**：
+> - `buildEnvString` 来自 `src/transitions/params.js`（✅ 已实现），负责 GLSL 类型转换
+> - sampler2D 纹理路径通过 `gl-transition` 的 uniforms 传递
+> - GL Transition 转场通过 `gl-renderer.js` 独立渲染，不走 FFmpeg 滤镜链
 
 ---
 
@@ -392,40 +471,23 @@ function buildGLTransitionFilter(clip1, clip2, transition, projectDir) {
 
 ## 四、实施计划（Implementation Plan）
 
-### Phase 1：核心基础设施
+### Phase 1：核心基础设施（WebGL 渲染器）
 
-**目标**：建立 GL Transition 的注册和 FFmpeg 集成框架
+**目标**：实现 `src/transitions/gl-renderer.js` 中的 WebGL 转场渲染器
 
-**任务**：
-1. 创建 `vendor/gl-transitions/` 目录
-2. 批量下载全部 121 个 `.glsl` 文件
-3. 创建 `src/transitions/registry.js` — 转场注册表
-4. 创建 `src/transitions/params.js` — 参数类型定义
-5. 修改 `src/core/builder.js` — 添加 GL Transition 识别逻辑
-6. 添加 `TRANSITION_GLSL_NOT_FOUND` 和 `TRANSITION_INVALID_PARAMS` 错误码
-7. 在 builder 中实现 FFmpeg `gltransition` 滤镜命令生成
-8. 生成默认噪声纹理 `vendor/gl-transitions/default-noise.png`（用于 luma 和 displacement）
-9. **FFmpeg 兼容性检查**：在启动时验证 `gltransition` 滤镜可用性，不可用时给出明确提示并降级
+> ✅ **已完成**：`src/transitions/registry.js`（121 个转场的注册表数据）
+> ✅ **已完成**：`src/transitions/params.js`（参数类型转换、验证）
+> ✅ **已完成**：`src/transitions/gl-renderer.js`（WebGL 渲染器核心实现）
+> ✅ **已完成**：`src/transitions/queue.js`（批量渲染队列）
 
-**FFmpeg 兼容性检查代码示例**：
-```javascript
-import { execSync } from 'child_process';
-
-function checkGLTransitionSupport() {
-  try {
-    const output = execSync('ffmpeg -filters', { encoding: 'utf-8' });
-    if (!output.includes('gltransition')) {
-      console.warn('[FFClaw] Warning: ffmpeg-gl-transition 滤镜不可用。');
-      console.warn('[FFClaw] GL Transitions 将不可用，请安装: npm install -g ffmpeg-gl-transition');
-      return false;
-    }
-    return true;
-  } catch (e) {
-    console.warn('[FFClaw] Warning: 无法检查 FFmpeg 支持。GL Transitions 可能不可用。');
-    return false;
-  }
-}
-```
+**核心任务**：
+1. `gl-renderer.js` 实现 headless WebGL context 创建
+   - 使用 `gl` npm 包创建 WebGL context
+   - 使用 `gl-transition` 包加载和执行 GLSL shader
+   - 实现 `render()` 函数生成转场视频
+   - 实现 `renderFrame()` 函数生成单帧 PNG
+2. 处理 `sampler2D` 纹理参数（luma, displacement）
+3. FFmpeg 集成：帧提取（解码）和视频编码
 
 **验收标准**：
 ```javascript
@@ -437,14 +499,45 @@ ffclaw timeline add-transition t1 --effect gl:bounce --duration 0.5 --between cl
 ffclaw timeline add-transition t1 --effect gl:circleCrop --duration 0.5 --between clip1,clip2
 ```
 
-### Phase 2：批量导入所有转场
+### Phase 2：GLSL 文件下载
 
 **任务**：
-1. 创建导入脚本 `scripts/import-gl-transitions.js`
-2. 自动下载所有 121 个 GLSL 文件到 `vendor/gl-transitions/`
-3. 自动解析每个 shader 的 uniform 参数（通过正则匹配 `// = value` 注释）
-4. 生成 `src/transitions/registry.js` 的初始数据
-5. 添加 TypeScript 类型定义
+1. 创建 `scripts/download-gl-transitions.js` 下载脚本
+2. 从 [gl-transitions/gl-transitions](https://github.com/gl-transitions/gl-transitions) 仓库下载全部 121 个 `.glsl` 文件到 `vendor/gl-transitions/`
+3. 生成默认噪声纹理 `vendor/gl-transitions/default-noise.png`（用于 luma 和 displacement）
+
+**下载脚本示例**：
+```javascript
+// scripts/download-gl-transitions.js
+import { execSync } from 'child_process';
+import fs from 'fs';
+import path from 'path';
+
+const VENDOR_DIR = 'vendor/gl-transitions';
+const GL_TRANSITIONS_REPO = 'https://github.com/gl-transitions/gl-transitions.git';
+
+async function downloadGLTransitions() {
+  // 克隆仓库（如果不存在）
+  if (!fs.existsSync(VENDOR_DIR)) {
+    execSync(`git clone ${GL_TRANSITIONS_REPO} ${VENDOR_DIR}`, { stdio: 'inherit' });
+  }
+  
+  // 清理不需要的文件，只保留 transitions 目录
+  const transitionsDir = path.join(VENDOR_DIR, 'transitions');
+  if (fs.existsSync(transitionsDir)) {
+    // 将 transitions/* .glsl 文件移动到 vendor/gl-transitions/
+    const files = fs.readdirSync(transitionsDir);
+    for (const file of files) {
+      if (file.endsWith('.glsl')) {
+        fs.copyFileSync(
+          path.join(transitionsDir, file),
+          path.join(VENDOR_DIR, file)
+        );
+      }
+    }
+  }
+}
+```
 
 ### Phase 3：参数支持
 
@@ -541,36 +634,40 @@ function resolveEffect(effect) {
     const name = effect.slice(3);
     const gl = getGLTransition(name);
     if (!gl) throw new Error(`GL Transition '${name}' not found`);
-    return { type: 'gl', glsl: gl.glsl, params: gl.params };
+    return { type: 'gl', glslFile: gl.glslFile, params: gl.params };
   }
   return { type: 'ffcreator', effect: TRANSITION_MAP[effect] ?? DEFAULT_TRANSITION };
 }
 
 // 2. 在 buildTransitionFilter 中处理 GL Transition
+// GL Transition 转场调用 gl-renderer.js 独立渲染
 function buildTransitionFilter(clip1File, clip2File, transition, projectDir) {
   const resolved = resolveEffect(transition.effect);
 
   if (resolved.type === 'gl') {
-    const glslPath = path.resolve(projectDir, 'vendor/gl-transitions', resolved.glsl);
-    const env = buildGLEnv(transition.params, resolved.params);
-    return `gltransition=duration=${transition.duration}:source=${glslPath}${env}`;
+    // 调用 GLTransitionRenderer 渲染
+    return renderGLTransition(clip1File, clip2File, transition, projectDir);
   }
 
-  // 原有的 FFCreator 路径
-  return buildFFCreatorTransition(clip1File, clip2File, resolved.effect, transition.duration);
+  // 原有的 FFCreator/FFmpeg 滤镜路径
+  return buildFFmpegTransitionFilter(clip1File, clip2File, resolved.effect, transition.duration);
 }
 ```
 
 ### 5.3 依赖要求
 
-需要安装支持 OpenGL 的 FFmpeg：
+npm 依赖（已安装）：
 
 ```bash
-# 检查当前 ffmpeg 是否支持 gltransition
-ffmpeg -filters | grep gltransition
+npm install gl gl-transition get-pixels save-pixels
+```
 
-# 如不支持，需要编译带 glfw 的版本
-# 参见 https://github.com/transitive-bullshit/ffmpeg-gl-transition
+FFmpeg（标准版，无需特殊编译）：
+
+```bash
+# 检查 FFmpeg 可用性（标准 FFmpeg 即可）
+ffmpeg -version
+ffprobe -version
 ```
 
 ---
@@ -669,12 +766,14 @@ console.log(waterDrop.params);
 
 ## 七、注意事项
 
-1. **FFmpeg GL Transition 依赖**：需要 `ffmpeg` 编译时支持 `gltransition` 滤镜（非默认安装）。必须使用 `ffmpeg-gl-transition` 项目提供的编译版本或自行编译。务必在 Phase 1 中检查兼容性，不可用时提供明确的错误提示和安装指引。
+1. **GL Transition 不依赖特殊 FFmpeg**：使用 `gl-transition` npm 包实现 WebGL 渲染，只需标准 FFmpeg（用于帧解码和编码），无需编译任何原生滤镜。
 
-2. **参数验证**：部分 shader 的 `sampler2D` 类型参数（如 `luma`、`displacementMap`）需要额外的纹理输入。FFClaw 会在 `vendor/gl-transitions/` 中预置 `default-noise.png`，用户也可通过 `--texture` 参数覆盖。
+2. **GLSL 文件来源**：从 [gl-transitions/gl-transitions](https://github.com/gl-transitions/gl-transitions) 仓库获取，全部 121 个 `.glsl` 文件存放在 `vendor/gl-transitions/transitions/` 目录。
 
-3. **性能考虑**：GL Transitions 是 GPU 密集型操作，在批量渲染时需要注意硬件配置。
+3. **参数验证**：部分 shader 的 `sampler2D` 类型参数（如 `luma`、`displacementMap`）需要额外的纹理输入。ClipCraft 会在 `vendor/gl-transitions/textures/` 中预置 `default-noise.png`，自动用于这些转场。
 
-4. **不破坏现有功能**：所有改动都通过 `gl:` 前缀与现有转场隔离，现有项目无需修改。
+4. **性能考虑**：GL Transitions 是 GPU 密集型操作，在批量渲染时需要注意硬件配置。
 
-5. **文件大小**：121 个 GLSL 文件总计约 300KB，对项目体积影响很小。
+5. **不破坏现有功能**：所有改动都通过 `gl:` 前缀与现有转场隔离，现有项目无需修改。
+
+6. **文件大小**：121 个 GLSL 文件总计约 300KB，对项目体积影响很小。

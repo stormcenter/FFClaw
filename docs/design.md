@@ -179,6 +179,9 @@ ffclaw timeline move c1 --offset 5 # 相对移动+5s
 # 在指定两个 clip 之间添加转场
 ffclaw timeline add-transition fade --between c1 c2 --duration 1.0
 
+# 使用 GL Transition 转场（121 种，gl: 前缀）
+ffclaw timeline add-transition gl:cross-zoom --between c1 c2 --duration 1.0
+
 # 默认：最后两个相邻 clip 之间（向下兼容）
 ffclaw timeline add-transition zoomright --duration 0.8
 
@@ -190,7 +193,15 @@ ffclaw timeline transitions
 # 基础: fade, wipe, slide
 # 叠化: crossfade, blur
 # 特效: zoomright, gridflip, radial, rotate
+# GL 转场: gl:cross-zoom, gl:bounce, gl:heart... (共 121 种)
 ```
+
+**GL Transition 说明：**
+FFClaw 内置 121 种 GLSL 过渡效果，使用 `gl:` 前缀调用（如 `gl:cross-zoom`）。基于 WebGL 渲染，不依赖特殊 FFmpeg。
+
+转场类型前缀：
+- `gl:` — GL Transition 转场（121 种）
+- 不带前缀 — FFmpeg 内置 xfade 转场
 
 #### 3.3.5 变速、音量与静音
 
@@ -524,7 +535,8 @@ brand_color: "#FF6B35"
 ```
 ffclaw/
 ├── bin/
-│   └── ffclaw.js           # CLI 入口（yargs 路由）
+│   ├── ffclaw.js              # CLI 入口（yargs 路由）
+│   └── ffclaw-transition.js   # GL Transition CLI 子命令
 ├── src/
 │   ├── commands/              # 命令层（薄，只做参数解析+输出格式化）
 │   │   ├── new.js
@@ -536,6 +548,12 @@ ffclaw/
 │   │   ├── template.js
 │   │   ├── preview.js
 │   │   └── queue.js
+│   ├── transitions/
+│   │   ├── registry.js        # 121 种 GL Transition 注册表
+│   │   ├── params.js          # GLSL 参数类型验证与转换
+│   │   ├── gl-renderer.js     # ★ GL Transition WebGL 渲染器
+│   │   ├── queue.js           # 批量渲染队列
+│   │   └── xfade-map.js       # GL → xfade 名称映射
 │   ├── core/                  # 核心业务逻辑（无 UI 依赖，可单测）
 │   │   ├── project.js          # ffclaw.json 读写（原子写）、校验
 │   │   ├── timeline-model.js   # 多轨时间线纯数据操作
@@ -544,7 +562,8 @@ ffclaw/
 │   │   └── filter-dsl.js      # 滤镜参数 → FFmpeg filtergraph
 │   ├── render/
 │   │   ├── progress-reporter.js  # 进度事件 → 终端进度条 / JSON
-│   │   └── export-runner.js      # 包装 FFCreator.start()
+│   │   ├── export-runner.js      # 包装 FFCreator.start()
+│   │   └── gl-compat.js          # FFmpeg gltransition 兼容性检测
 │   ├── template/
 │   │   ├── engine.js           # 模板变量替换 {{var}}
 │   │   └── validator.js        # 必填变量检查
@@ -556,6 +575,9 @@ ffclaw/
 │   ├── product-showcase.cfc.json
 │   ├── slideshow.cfc.json
 │   └── subtitle-reel.cfc.json
+├── vendor/
+│   ├── FFCreator/            # FFCreator (视频基础渲染)
+│   └── gl-transitions/       # 121 个 GLSL shader + 纹理
 └── package.json
 ```
 
@@ -602,6 +624,8 @@ FFCreator 实例（可调用 .start()）
 | `lib/index.js` | 确认所有 node 类已导出 | builder.js 需要 FFVideo/FFText 等类 |
 
 **均是小改动，可作为 PR 合入 FFCreator 主库。**
+
+> **注：GL Transition 转场不依赖 FFCreator**，使用独立的 WebGL 渲染器（`gl-renderer.js`）。FFCreator 仍用于基础视频合成和 FFmpeg 封装。
 
 ### 5.4 数据流
 
@@ -770,6 +794,8 @@ Agent 执行步骤:
 
 8. timeline trim / split / move
 9. timeline add-transition（映射 FFCreator shader）
+9a. `ffclaw transition` 子命令（list/preview/render）
+9b. GL Transition 渲染器（gl-renderer.js）
 10. timeline add text（FFText + 动画）
 11. timeline speed / volume（FFmpeg 参数）
 12. timeline show（ASCII 时间线渲染）
