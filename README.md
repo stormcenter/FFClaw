@@ -623,6 +623,25 @@ FFClaw/vendor/FFCreator  ← FFCreator 作为 git submodule
 
 如需修改 FFCreator，在 `vendor/FFCreator/` 内直接操作并提交，submodule 会记录新的 commit 引用。
 
+## TODO / Roadmap
+
+### PAG 文件支持
+
+计划集成 [PAG (Portable Animated Graphics)](https://pag.io) 动画格式支持。PAG 是腾讯开源的矢量动画格式，广泛用于抖音/TikTok 等短视频平台的动态贴纸、片头片尾模板。
+
+**目标能力：**
+
+- 将 `.pag` 文件作为素材导入时间线（`ffclaw asset import`）
+- 在视频层叠加 PAG 动画（替代 GIF/WebP 贴纸）
+- 支持 PAG 模板变量替换（文字、图片占位符）
+- 导出时通过 `libpag` 渲染为视频帧，再由 FFmpeg 合成输出
+
+**参考方案：**
+- Node.js 侧通过 N-API 绑定 [libpag](https://github.com/Tencent/libpag) C++ SDK
+- 或调用 `pagexporter` CLI 工具将 PAG 渲染为帧序列/视频，再交给 FFmpeg 合成
+
+---
+
 ## License
 
 MIT
