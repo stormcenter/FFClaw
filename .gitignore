@@ -11,11 +11,6 @@ node_modules/
 
 # Output files
 output/
-*.mp4
-*.mov
-*.avi
-*.mkv
-*.webm
 
 # Logs
 *.log

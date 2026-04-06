@@ -1,0 +1,607 @@
+[
+  {
+    "name": "book-flip",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-book-flip.mp4"
+  },
+  {
+    "name": "bow-tie-horizontal",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-bow-tie-horizontal.mp4"
+  },
+  {
+    "name": "bow-tie-vertical",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-bow-tie-vertical.mp4"
+  },
+  {
+    "name": "cannabisleaf",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-cannabisleaf.mp4"
+  },
+  {
+    "name": "coord-from-in",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-coord-from-in.mp4"
+  },
+  {
+    "name": "crosswarp",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-crosswarp.mp4"
+  },
+  {
+    "name": "dreamy",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-dreamy.mp4"
+  },
+  {
+    "name": "fade",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-fade.mp4"
+  },
+  {
+    "name": "fold",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-fold.mp4"
+  },
+  {
+    "name": "fragment",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-fragment.mp4"
+  },
+  {
+    "name": "glitch-displace",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-glitch-displace.mp4"
+  },
+  {
+    "name": "glitch-memories",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-glitch-memories.mp4"
+  },
+  {
+    "name": "heart",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-heart.mp4"
+  },
+  {
+    "name": "hsvfade",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-hsvfade.mp4"
+  },
+  {
+    "name": "horizontal-close",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-horizontal-close.mp4"
+  },
+  {
+    "name": "horizontal-open",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-horizontal-open.mp4"
+  },
+  {
+    "name": "inverted-page-curl",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-inverted-page-curl.mp4"
+  },
+  {
+    "name": "left-right",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-left-right.mp4"
+  },
+  {
+    "name": "multiply-blend",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-multiply-blend.mp4"
+  },
+  {
+    "name": "randomnoisex",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-randomnoisex.mp4"
+  },
+  {
+    "name": "rotate-transition",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-rotate-transition.mp4"
+  },
+  {
+    "name": "scale-in",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-scale-in.mp4"
+  },
+  {
+    "name": "simple-flip",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-simple-flip.mp4"
+  },
+  {
+    "name": "swirl",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-swirl.mp4"
+  },
+  {
+    "name": "tangent-motion-blur",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-tangent-motion-blur.mp4"
+  },
+  {
+    "name": "top-bottom",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-top-bottom.mp4"
+  },
+  {
+    "name": "vertical-close",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-vertical-close.mp4"
+  },
+  {
+    "name": "vertical-open",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-vertical-open.mp4"
+  },
+  {
+    "name": "windowblinds",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-windowblinds.mp4"
+  },
+  {
+    "name": "wipe-down",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-wipe-down.mp4"
+  },
+  {
+    "name": "wipe-left",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-wipe-left.mp4"
+  },
+  {
+    "name": "wipe-right",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-wipe-right.mp4"
+  },
+  {
+    "name": "wipe-up",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-wipe-up.mp4"
+  },
+  {
+    "name": "x-axis-translation",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-x-axis-translation.mp4"
+  },
+  {
+    "name": "zoom-in-circles",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-zoom-in-circles.mp4"
+  },
+  {
+    "name": "zoom-in-out",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-zoom-in-out.mp4"
+  },
+  {
+    "name": "advanced-mosaic",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-advanced-mosaic.mp4"
+  },
+  {
+    "name": "angular",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-angular.mp4"
+  },
+  {
+    "name": "block-dissolve",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-block-dissolve.mp4"
+  },
+  {
+    "name": "bounce",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-bounce.mp4"
+  },
+  {
+    "name": "bow-tie-with-parameter",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-bow-tie-with-parameter.mp4"
+  },
+  {
+    "name": "box",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-box.mp4"
+  },
+  {
+    "name": "burn",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-burn.mp4"
+  },
+  {
+    "name": "burn0",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-burn0.mp4"
+  },
+  {
+    "name": "butterfly-wave-scrawler",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-butterfly-wave-scrawler.mp4"
+  },
+  {
+    "name": "chessboard",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-chessboard.mp4"
+  },
+  {
+    "name": "circle",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-circle.mp4"
+  },
+  {
+    "name": "circle-crop",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-circle-crop.mp4"
+  },
+  {
+    "name": "circleopen",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-circleopen.mp4"
+  },
+  {
+    "name": "colour-distance",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-colour-distance.mp4"
+  },
+  {
+    "name": "colorphase",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-colorphase.mp4"
+  },
+  {
+    "name": "crazy-parametric-fun",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-crazy-parametric-fun.mp4"
+  },
+  {
+    "name": "crosshatch",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-crosshatch.mp4"
+  },
+  {
+    "name": "cross-zoom",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-cross-zoom.mp4"
+  },
+  {
+    "name": "cube",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-cube.mp4"
+  },
+  {
+    "name": "defocus-blur",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-defocus-blur.mp4"
+  },
+  {
+    "name": "directional",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-directional.mp4"
+  },
+  {
+    "name": "directional-easing",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-directional-easing.mp4"
+  },
+  {
+    "name": "directional-scaled",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-directional-scaled.mp4"
+  },
+  {
+    "name": "directionalwarp",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-directionalwarp.mp4"
+  },
+  {
+    "name": "directionalwipe",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-directionalwipe.mp4"
+  },
+  {
+    "name": "displacement",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-displacement.mp4"
+  },
+  {
+    "name": "dissolve",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-dissolve.mp4"
+  },
+  {
+    "name": "doom-screen-transition",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-doom-screen-transition.mp4"
+  },
+  {
+    "name": "doorway",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-doorway.mp4"
+  },
+  {
+    "name": "dreamy-zoom",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-dreamy-zoom.mp4"
+  },
+  {
+    "name": "edge-transition",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-edge-transition.mp4"
+  },
+  {
+    "name": "fadecolor",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-fadecolor.mp4"
+  },
+  {
+    "name": "fadegrayscale",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-fadegrayscale.mp4"
+  },
+  {
+    "name": "film-burn",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-film-burn.mp4"
+  },
+  {
+    "name": "flyeye",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-flyeye.mp4"
+  },
+  {
+    "name": "grid-flip",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-grid-flip.mp4"
+  },
+  {
+    "name": "hexagonalize",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-hexagonalize.mp4"
+  },
+  {
+    "name": "kaleidoscope",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-kaleidoscope.mp4"
+  },
+  {
+    "name": "linear-blur",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-linear-blur.mp4"
+  },
+  {
+    "name": "luma",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-luma.mp4"
+  },
+  {
+    "name": "luminance-melt",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-luminance-melt.mp4"
+  },
+  {
+    "name": "morph",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-morph.mp4"
+  },
+  {
+    "name": "mosaic",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-mosaic.mp4"
+  },
+  {
+    "name": "mosaic-transition",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-mosaic-transition.mp4"
+  },
+  {
+    "name": "overexposure",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-overexposure.mp4"
+  },
+  {
+    "name": "parametric-glitch",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-parametric-glitch.mp4"
+  },
+  {
+    "name": "perlin",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-perlin.mp4"
+  },
+  {
+    "name": "pinwheel",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-pinwheel.mp4"
+  },
+  {
+    "name": "pixelize",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-pixelize.mp4"
+  },
+  {
+    "name": "polar-function",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-polar-function.mp4"
+  },
+  {
+    "name": "polka-dots-curtain",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-polka-dots-curtain.mp4"
+  },
+  {
+    "name": "power-kaleido",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-power-kaleido.mp4"
+  },
+  {
+    "name": "puzzle-right",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-puzzle-right.mp4"
+  },
+  {
+    "name": "radial",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-radial.mp4"
+  },
+  {
+    "name": "randomsquares",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-randomsquares.mp4"
+  },
+  {
+    "name": "rectangle",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-rectangle.mp4"
+  },
+  {
+    "name": "rectangle-crop",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-rectangle-crop.mp4"
+  },
+  {
+    "name": "ripple",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-ripple.mp4"
+  },
+  {
+    "name": "rolls",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-rolls.mp4"
+  },
+  {
+    "name": "rotate-scale-fade",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-rotate-scale-fade.mp4"
+  },
+  {
+    "name": "rotate-scale-vanish",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-rotate-scale-vanish.mp4"
+  },
+  {
+    "name": "simple-zoom",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-simple-zoom.mp4"
+  },
+  {
+    "name": "simple-zoom-out",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-simple-zoom-out.mp4"
+  },
+  {
+    "name": "slides",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-slides.mp4"
+  },
+  {
+    "name": "split-slide-in-horizontal",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-split-slide-in-horizontal.mp4"
+  },
+  {
+    "name": "split-slide-in-out-horizontal",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-split-slide-in-out-horizontal.mp4"
+  },
+  {
+    "name": "split-slide-in-out-vertical",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-split-slide-in-out-vertical.mp4"
+  },
+  {
+    "name": "split-slide-in-vertical",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-split-slide-in-vertical.mp4"
+  },
+  {
+    "name": "split-slide-out-horizontal",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-split-slide-out-horizontal.mp4"
+  },
+  {
+    "name": "split-slide-out-vertical",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-split-slide-out-vertical.mp4"
+  },
+  {
+    "name": "squareswire",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-squareswire.mp4"
+  },
+  {
+    "name": "squeeze",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-squeeze.mp4"
+  },
+  {
+    "name": "star-wipe",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-star-wipe.mp4"
+  },
+  {
+    "name": "static-wipe",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-static-wipe.mp4"
+  },
+  {
+    "name": "static-fade",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-static-fade.mp4"
+  },
+  {
+    "name": "stereo-viewer",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-stereo-viewer.mp4"
+  },
+  {
+    "name": "swap",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-swap.mp4"
+  },
+  {
+    "name": "tiles-wave",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-tiles-wave.mp4"
+  },
+  {
+    "name": "tv-static",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-tv-static.mp4"
+  },
+  {
+    "name": "undulating-burn-out",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-undulating-burn-out.mp4"
+  },
+  {
+    "name": "water-drop",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-water-drop.mp4"
+  },
+  {
+    "name": "wind",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-wind.mp4"
+  },
+  {
+    "name": "windowslice",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-windowslice.mp4"
+  },
+  {
+    "name": "zoom-left-wipe",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-zoom-left-wipe.mp4"
+  },
+  {
+    "name": "zoom-right-wipe",
+    "status": "ok",
+    "path": "test/gl-transition-samples/sample-zoom-right-wipe.mp4"
+  }
+]
