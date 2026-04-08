@@ -23,9 +23,7 @@ import path from 'node:path';
 
 import { load, resolveProjectDir } from '../core/project.js';
 import { TimelineModel } from '../core/timeline-model.js';
-import { build } from '../core/builder.js';
-import { run } from '../render/export-runner.js';
-import { renderWithFFmpeg, needsFFmpegPipeline } from '../render/ffmpeg-renderer.js';
+import { renderWithFFmpeg } from '../render/ffmpeg-renderer.js';
 import { print, ok, error, Errors } from '../utils/output.js';
 
 const execFileAsync = promisify(execFile);
@@ -140,34 +138,13 @@ async function handleExport(argv) {
   }
 
   let outputPath;
-
-  if (needsFFmpegPipeline(model)) {
-    // ── FFmpeg pipeline: used when gl: transitions are present ─────────────
-    try {
-      outputPath = await renderWithFFmpeg(model, projectData, dir, renderOpts, opts);
-    } catch (err) {
-      if (err.code === 'RENDER_ERROR') {
-        error(Errors.RENDER_ERROR, err.message, opts);
-      }
-      throw err;
+  try {
+    outputPath = await renderWithFFmpeg(model, projectData, dir, renderOpts, opts);
+  } catch (err) {
+    if (err.code === 'RENDER_ERROR') {
+      error(Errors.RENDER_ERROR, err.message, opts);
     }
-  } else {
-    // ── FFCreator pipeline: used for standard timelines ────────────────────
-    let creator;
-    try {
-      creator = await build(model, projectData, dir, renderOpts);
-    } catch (err) {
-      mapBuildError(err, opts);
-    }
-
-    try {
-      outputPath = await run(creator, opts);
-    } catch (err) {
-      if (err.code === 'RENDER_ERROR') {
-        error(Errors.RENDER_ERROR, err.message, opts);
-      }
-      throw err;
-    }
+    throw err;
   }
 
   ok({ op: 'export', output: outputPath ?? output, crf, preset, audioBitrate }, opts);
@@ -258,22 +235,7 @@ async function loadProject(dir, opts) {
 }
 
 /**
- * Map build errors to user-friendly output.
- *
- * @param {Error} err
- * @param {{ json?: boolean, quiet?: boolean }} opts
- * @returns {never}
- */
-function mapBuildError(err, opts) {
-  if (err.code === 'ASSET_NOT_FOUND') {
-    error(Errors.ASSET_NOT_FOUND, err.message, opts);
-  }
-  throw err;
-}
-
-/**
  * Compute a clip's rendered duration on the timeline.
- * (Mirrors the helper in builder.js without importing it.)
  *
  * @param {object} clip
  * @returns {number}

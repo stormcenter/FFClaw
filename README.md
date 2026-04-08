@@ -1,6 +1,6 @@
 # FFClaw
 
-> 剪映是 GUI，FFClaw 是 CLI 版剪映。基于 FFCreator 的命令行视频剪辑工具，面向会用剪映的剪辑师，无需写代码。
+> 剪映是 GUI，FFClaw 是 CLI 版剪映。基于 FFmpeg 的命令行视频剪辑工具，面向会用剪映的剪辑师，无需写代码。
 
 ---
 
@@ -30,7 +30,7 @@
 
 ## 简介
 
-**FFClaw** 将 FFCreator 的 WebGL 渲染能力封装为剪映风格的 CLI 接口，支持：
+**FFClaw** 将 FFmpeg 的强大渲染能力封装为剪映风格的 CLI 接口，支持：
 
 - 视频剪辑：多轨时间线、裁剪、分割、移动、变速
 - 音频控制：音量、静音、淡入淡出、循环
@@ -51,9 +51,9 @@ ffmpeg  # 需附带 ffprobe
 **克隆并安装**
 
 ```bash
-git clone --recursive https://github.com/your-repo/FFClaw.git
+git clone https://github.com/stormcenter/FFClaw.git
 cd FFClaw
-npm install          # postinstall 会自动安装 FFCreator 的依赖
+npm install
 ```
 
 **全局注册（可选）**
@@ -545,7 +545,6 @@ ffclaw/
 │   ├── core/
 │   │   ├── project.js         # ffclaw.json 原子读写 + 校验
 │   │   ├── timeline-model.js  # 多轨时间线纯数据操作（可独立单测）
-│   │   ├── builder.js         # ★ 多轨时间线 → FFCreator API 翻译层
 │   │   ├── asset-store.js     # ffprobe 探测 + 素材持久化
 │   │   └── filter-dsl.js      # 滤镜 DSL → FFmpeg filtergraph
 │   ├── transitions/
@@ -555,9 +554,8 @@ ffclaw/
 │   │   ├── queue.js           # 批量渲染队列
 │   │   └── xfade-map.js       # GL → xfade 名称映射（121 条）
 │   ├── render/
-│   │   ├── progress-reporter.js  # 进度事件 → 终端进度条 / JSON
-│   │   ├── export-runner.js      # 包装 FFCreator.start()
-│   │   ├── ffmpeg-renderer.js    # ★ 纯 FFmpeg 渲染管道（GL 转场 / xfade）
+│   │   ├── progress-reporter.js  # 进度状态管理工具
+│   │   ├── ffmpeg-renderer.js    # ★ FFmpeg 渲染管道（filter_complex / xfade / gltransition）
 │   │   └── gl-compat.js          # FFmpeg gltransition 兼容性检测与转场 filter 构建
 │   ├── template/
 │   │   ├── engine.js           # {{var}} 模板渲染引擎
@@ -569,7 +567,6 @@ ffclaw/
 ├── bin/
 │   └── ffclaw.js              # CLI 入口（yargs 路由）
 ├── vendor/
-│   ├── FFCreator/             # FFCreator git submodule
 │   └── gl-transitions/        # 121 个 GLSL shader 文件 + 默认噪声纹理
 └── test/
     ├── unit/                   # 核心模块单元测试
@@ -578,13 +575,13 @@ ffclaw/
     └── gl-transition-samples/  # ★ 121 种转场效果示例视频
 ```
 
-**Builder 翻译层**（`src/core/builder.js`）是核心难点：FFCreator 是 Scene 串联模型，FFClaw 是多轨并行模型。Builder 将多轨时间线切分为 FFCreator 的 Scene 序列：
+**渲染管道**（`src/render/ffmpeg-renderer.js`）是核心：将多轨时间线转换为 FFmpeg `filter_complex` 滤镜图一次性渲染输出：
 
-1. 收集所有切割点（clip start/end + transition 边界）
-2. 每段切割点区间对应一个 Scene
-3. 确定每个 Scene 内可见的 clips
-4. 设置 Scene 间的 transition
-5. 全局附加音频轨和文字层
+1. 每个视频/图片 clip 作为 `-i` 输入，按 in/out/speed 裁剪
+2. 统一缩放到画布尺寸（`scale + pad`）
+3. 相邻 clip 之间通过 `xfade`（或 `gltransition`）衔接
+4. 独立音频轨通过 `adelay + amix` 混音
+5. 文字通过 `drawtext` 滤镜叠加
 
 ---
 
@@ -612,16 +609,7 @@ node bin/ffclaw.js timeline --help
 - 核心模块（`src/core/*`）：≥ 90% 行覆盖率
 - 命令层（`src/commands/*`）：≥ 80% 行覆盖率
 
-> 目前：110 个单元测试全部通过，覆盖核心模块及 GL Transition 渲染链路。
-
-**与 FFCreator 的关系：**
-
-```
-FFClaw/src/           ← 纯新增，不修改 FFCreator 代码
-FFClaw/vendor/FFCreator  ← FFCreator 作为 git submodule
-```
-
-如需修改 FFCreator，在 `vendor/FFCreator/` 内直接操作并提交，submodule 会记录新的 commit 引用。
+> 目前：单元测试全部通过，覆盖核心模块及 GL Transition 渲染链路。
 
 ## TODO / Roadmap
 

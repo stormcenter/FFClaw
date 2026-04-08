@@ -1,9 +1,9 @@
 /**
- * FFmpeg-based renderer for timelines that contain GL transitions.
+ * FFmpeg-based renderer — the sole rendering backend for FFClaw.
  *
  * Pipeline overview
  * ─────────────────
- * 1. Each video clip becomes an ffmpeg -i input (trimmed via -ss/-t).
+ * 1. Each video/image clip becomes an ffmpeg -i input (trimmed via -ss/-t).
  * 2. All clips are scaled to the target canvas size.
  * 3. Adjacent clips are joined with xfade (or gltransition if available).
  *    The xfade `offset` is the number of seconds into the concatenated
@@ -460,15 +460,3 @@ export async function renderWithFFmpeg(model, projectData, projectDir, renderOpt
   });
 }
 
-/**
- * Returns true if the timeline contains any transition that requires the
- * FFmpeg pipeline (gl: prefix OR any transition at all, since xfade needs
- * the FFmpeg pipeline).
- *
- * @param {import('../core/timeline-model.js').TimelineModel} model
- * @returns {boolean}
- */
-export function needsFFmpegPipeline(model) {
-  const timeline = model.toJSON();
-  return timeline.transitions.some(t => t.effect.startsWith('gl:'));
-}

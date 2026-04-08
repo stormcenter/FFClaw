@@ -1,7 +1,7 @@
 {
   "name": "ffclaw",
   "version": "0.1.0",
-  "description": "CLI video editor powered by FFCreator — the command-line剪映",
+  "description": "CLI video editor powered by FFmpeg — the command-line video tool",
   "type": "module",
   "bin": {
     "ffclaw": "./bin/ffclaw.js"
@@ -13,7 +13,6 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "postinstall": "node scripts/postinstall.js",
     "test": "node --experimental-vm-modules node_modules/.bin/jest",
     "test:unit": "node --experimental-vm-modules node_modules/.bin/jest test/unit",
     "test:integration": "node --experimental-vm-modules node_modules/.bin/jest test/integration",
@@ -22,7 +21,6 @@
   "dependencies": {
     "ajv": "^8.17.1",
     "cross-spawn": "^7.0.6",
-    "ffcreator": "file:./vendor/FFCreator",
     "get-pixels": "^3.3.3",
     "gl": "^8.1.6",
     "gl-texture2d": "^2.1.0",
@@ -49,7 +47,6 @@
   "keywords": [
     "video",
     "cli",
-    "ffcreator",
     "ffmpeg",
     "editor"
   ],

@@ -18,10 +18,8 @@
 import path from 'node:path';
 import { load, save, resolveProjectDir } from '../core/project.js';
 import { TimelineModel } from '../core/timeline-model.js';
-import { build } from '../core/builder.js';
-import { run } from '../render/export-runner.js';
-import { print, ok, error, Errors, progress } from '../utils/output.js';
-import { ProgressReporter } from '../render/progress-reporter.js';
+import { renderWithFFmpeg } from '../render/ffmpeg-renderer.js';
+import { print, ok, error, Errors } from '../utils/output.js';
 
 // Job statuses
 const JOB_STATUS = {
@@ -502,15 +500,13 @@ async function runJob(job, projectData, dir, parallel, opts) {
     fps: params.fps ?? projectData.fps,
   };
 
-  const model   = new TimelineModel(projectData.timeline);
-  const creator = build(model, jobProjectData, dir, {
+  const model = new TimelineModel(projectData.timeline);
+  await renderWithFFmpeg(model, jobProjectData, dir, {
     output,
-    crf:     params.crf ?? 23,
-    preset:  params.preset ?? 'fast',
+    crf:          params.crf ?? 23,
+    preset:       params.preset ?? 'fast',
     audioBitrate: '192k',
-  });
-
-  await run(creator, opts);
+  }, opts);
 }
 
 // ── Shared helpers ────────────────────────────────────────────────────────────

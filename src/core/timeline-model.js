@@ -386,7 +386,7 @@ export class TimelineModel {
     }
 
     // Validate GL Transition params if this is a gl: effect
-    const effect = opts.type ?? 'fade';
+    const effect = opts.effect ?? opts.type ?? 'fade';
     if (effect.startsWith('gl:')) {
       const name = effect.slice(3);
       const gl   = getGLTransition(name);
@@ -409,7 +409,7 @@ export class TimelineModel {
     /** @type {Transition} */
     const transition = {
       id,
-      type:     effect,
+      effect,
       duration: opts.duration ?? 0.5,
       between:  [clipId1, clipId2],
       ...(opts.params && Object.keys(opts.params).length > 0 && { params: opts.params }),

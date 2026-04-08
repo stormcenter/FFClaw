@@ -8,11 +8,10 @@
  */
 
 import path from 'node:path';
-import { load, save, resolveProjectDir } from '../core/project.js';
+import { load, resolveProjectDir } from '../core/project.js';
 import { TimelineModel } from '../core/timeline-model.js';
-import { build } from '../core/builder.js';
-import { run } from '../render/export-runner.js';
-import { print, ok, error, Errors, progress } from '../utils/output.js';
+import { renderWithFFmpeg } from '../render/ffmpeg-renderer.js';
+import { print, ok, error, Errors } from '../utils/output.js';
 
 // ── Yargs command definition ──────────────────────────────────────────────────
 
@@ -101,9 +100,8 @@ async function handlePreview(argv) {
 
   const output = path.resolve(argv.output ?? path.join(dir, 'preview.mp4'));
 
-  // ── Build FFCreator with preview settings ─────────────────────────────────
+  // ── Scale project dimensions for preview ──────────────────────────────────
 
-  // Temporarily adjust project dimensions for preview
   const previewWidth  = argv.width;
   const previewHeight = Math.round(previewWidth * (projectData.height / projectData.width));
 
@@ -114,27 +112,18 @@ async function handlePreview(argv) {
     fps:    argv.fps,
   };
 
-  let creator;
-  try {
-    creator = build(model, previewProjectData, dir, {
-      output,
-      crf:    argv.crf,
-      preset: 'ultrafast',
-      audioBitrate: '96k',
-    });
-  } catch (err) {
-    const e = new Error(`Failed to build preview: ${err.message}`);
-    e.code  = 'RENDER_ERROR';
-    throw e;
-  }
-
-  // ── Render ─────────────────────────────────────────────────────────────────
+  // ── Render via FFmpeg ──────────────────────────────────────────────────────
 
   print(`Rendering preview (${previewWidth}×${previewHeight} @ ${argv.fps}fps, CRF ${argv.crf})…`, opts);
 
   let outputPath;
   try {
-    outputPath = await run(creator, opts);
+    outputPath = await renderWithFFmpeg(model, previewProjectData, dir, {
+      output,
+      crf:          argv.crf,
+      preset:       'ultrafast',
+      audioBitrate: '96k',
+    }, opts);
   } catch (err) {
     error(Errors.RENDER_ERROR, `Preview render failed: ${err.message}`, opts);
   }
@@ -147,7 +136,6 @@ async function handlePreview(argv) {
     const { exec } = await import('node:child_process');
     exec(`open "${outputPath}"`, (err) => {
       if (err) {
-        // Non-fatal — just log
         process.stderr.write(`Warning: could not open preview: ${err.message}\n`);
       }
     });

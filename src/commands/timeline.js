@@ -476,7 +476,7 @@ async function handleAddTransition(argv) {
   let id;
   try {
     ({ id } = model.addTransition(argv.clip1, argv.clip2, {
-      type:     argv.effect,
+      effect:   argv.effect,
       duration: argv.duration,
       params,
     }));

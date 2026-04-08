@@ -269,21 +269,6 @@ export function createJobReporter(job, opts = {}) {
 }
 
 /**
- * Attach progress reporter event listeners to an FFCreator instance.
- *
- * @param {import('ffcreator').FFCreator} creator
- * @param {ProgressReporter} reporter
- * @returns {import('ffcreator').FFCreator}  The creator (for chaining)
- */
-export function attachProgress(creator, reporter) {
-  creator.on('start',     () => reporter.onStart());
-  creator.on('progress',  (e) => reporter.onProgress(e));
-  creator.on('complete',  (e) => reporter.onComplete(e));
-  creator.on('error',     (e) => reporter.onError(e?.error ?? e));
-  return creator;
-}
-
-/**
  * Throttle function — only calls the underlying function at most once per `minInterval` ms.
  *
  * @param {(e: any) => void} fn
