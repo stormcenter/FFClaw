@@ -19,16 +19,11 @@
     "lint": "eslint src bin --ext .js"
   },
   "dependencies": {
-    "ajv": "^8.17.1",
-    "cross-spawn": "^7.0.6",
     "get-pixels": "^3.3.3",
     "gl": "^8.1.6",
     "gl-texture2d": "^2.1.0",
     "gl-transition": "^1.13.0",
-    "gl-transition-utils": "^1.18.0",
     "ndarray": "^1.0.19",
-    "psl": "^1.15.0",
-    "request": "^2.88.2",
     "save-pixels": "^2.3.6",
     "write-file-atomic": "^5.0.1",
     "yargs": "^17.7.2"
