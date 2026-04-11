@@ -16,7 +16,8 @@
     "test": "node --experimental-vm-modules node_modules/.bin/jest",
     "test:unit": "node --experimental-vm-modules node_modules/.bin/jest test/unit",
     "test:integration": "node --experimental-vm-modules node_modules/.bin/jest test/integration",
-    "lint": "eslint src bin --ext .js"
+    "lint": "eslint src bin --ext .js",
+    "postinstall": "node scripts/download-fonts.js"
   },
   "dependencies": {
     "get-pixels": "^3.3.3",

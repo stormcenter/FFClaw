@@ -76,6 +76,43 @@ export function builder(yargs) {
             type: 'string',
             description: 'Exit animation name',
           })
+          .option('animation', {
+            type: 'string',
+            description: 'Animation style (fade / slide-up / typewriter / karaoke / none)',
+            default: 'fade',
+          })
+          .option('animate-in-duration', {
+            type: 'number',
+            description: 'In-animation duration in seconds',
+            default: 0.4,
+          })
+          .option('animate-out-duration', {
+            type: 'number',
+            description: 'Out-animation duration in seconds',
+            default: 0.4,
+          })
+          .option('outline', {
+            type: 'number',
+            description: 'Outline thickness in pixels (default 2)',
+          })
+          .option('shadow', {
+            type: 'number',
+            description: 'Shadow distance in pixels (default 1)',
+          })
+          .option('bold', {
+            type: 'boolean',
+            description: 'Bold text',
+            default: false,
+          })
+          .option('italic', {
+            type: 'boolean',
+            description: 'Italic text',
+            default: false,
+          })
+          .option('karaoke-words', {
+            type: 'string',
+            description: "Karaoke words JSON array, e.g. '[{\"w\":\"Hello\",\"ms\":500}]'",
+          })
           .option('subtitle', {
             type: 'boolean',
             description: 'Treat as a subtitle clip (positioned at bottom)',
@@ -138,6 +175,21 @@ export function builder(yargs) {
           .example('$0 text style c1 --font-size 60 --color #ff0000', 'Resize and recolour'),
       handler: handleStyle,
     })
+    // ── text animations ─────────────────────────────────────────────────────
+    .command({
+      command: 'animations',
+      aliases: ['animation', 'anim'],
+      desc: 'List all available text animation styles',
+      builder: (y) =>
+        y
+          .option('json', {
+            type: 'boolean',
+            description: 'Output as JSON',
+          })
+          .example('$0 text animations', 'List all animation styles')
+          .example('$0 text animations --json', 'JSON output'),
+      handler: handleAnimations,
+    })
     .demandCommand(1, 'Please specify a text sub-command.')
     .example('$0 text add "Hello!" --start 0', 'Add a simple text overlay')
     .example('$0 text list', 'Show all text clips');
@@ -165,17 +217,37 @@ async function handleAdd(argv) {
   // Determine position preset
   const position = argv.position ?? (argv.subtitle ? 'bottom' : 'bottom');
 
+  // Parse karaoke words if provided
+  let karaokeWords = undefined;
+  if (argv['karaoke-words']) {
+    try {
+      karaokeWords = JSON.parse(argv['karaoke-words']);
+    } catch {
+      error({ code: 'INVALID_ARG' }, '--karaoke-words must be valid JSON', opts);
+      return;
+    }
+  }
+
   const { id } = model.addClip({
     type:     'text',
     start:    argv.start,
     duration: argv.duration,
     content,
-    fontSize: argv['font-size'],
-    color:    argv.color,
-    font:     argv.font,
-    align:    argv.align,
-    animateIn:  argv['animate-in'],
-    animateOut: argv['animate-out'],
+    fontSize:    argv['font-size'],
+    color:       argv.color,
+    font:        argv.font,
+    align:       argv.align,
+    position:    position,
+    animateIn:   argv['animate-in'],
+    animateOut:  argv['animate-out'],
+    animation:   argv.animation,
+    animateInDuration:  argv['animate-in-duration'],
+    animateOutDuration: argv['animate-out-duration'],
+    outline:     argv.outline,
+    shadow:      argv.shadow,
+    bold:        argv.bold,
+    italic:      argv.italic,
+    karaokeWords,
   });
 
   projectData.timeline = model.toJSON();
@@ -345,6 +417,34 @@ async function handleStyle(argv) {
 
   print(`Styled text clip ${clipId}`, opts);
   ok({ op: 'text-style', clipId, ...updates }, opts);
+}
+
+/** Handle `text animations` */
+async function handleAnimations(argv) {
+  const opts = { json: argv.json, quiet: argv.quiet };
+
+  const { listAnimations } = await import('../ass/animations/index.js');
+  const animations = listAnimations();
+
+  if (argv.json) {
+    print(animations, opts);
+    return;
+  }
+
+  const W = 60;
+  print('\n  ANIMATION STYLES', opts);
+  print('  ' + '─'.repeat(W), opts);
+  print(`  ${'NAME'.padEnd(14)}  ${'DESCRIPTION'.padEnd(20)}  PARAMS`, opts);
+  print('  ' + '─'.repeat(W), opts);
+
+  for (const anim of animations) {
+    const params = Object.keys(anim.params || {}).join(', ') || '-';
+    print(`  ${anim.name.padEnd(14)}  ${(anim.description || '-').padEnd(20)}  ${params}`, opts);
+  }
+
+  print('  ' + '─'.repeat(W), opts);
+  print(`  Total: ${animations.length} animation style(s)`, opts);
+  print('', opts);
 }
 
 // ── Shared helpers ────────────────────────────────────────────────────────────

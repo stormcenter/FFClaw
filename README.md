@@ -272,20 +272,25 @@ ffclaw filter create --name "我的调色" --brightness 10 --saturation -5
 ### text — 文字字幕
 
 ```bash
-# 对已添加的文字 clip 设置动画
-ffclaw text animate c4 --in fadeIn --out slideUp --duration 0.5
+# 添加文字字幕（支持 ASS 动画）
+ffclaw text add "欢迎观看" --start 0 --duration 3 --animation fade
+ffclaw text add "卡拉OK效果" --start 3 --duration 4 --animation karaoke \
+  --karaoke-words '[{"w":"卡拉","ms":500},{"w":"OK","ms":500}]'
 
-# 查看可用动画
+# 查看所有可用动画风格
 ffclaw text animations
-# 入场: fadeIn, slideInLeft, slideInRight, zoomIn, bounceIn
-# 出场: fadeOut, slideOutLeft, slideOutRight, zoomOut
-# 循环: pulse, shake, float
+ffclaw text animations --json
 
-# 设置渐变颜色
-ffclaw text gradient c4 --from "#FF6B35" --to "#FFB347" --angle 45
+# 可用动画：fade / slide-up / typewriter / karaoke / none
 
-# 从 SRT 文件批量导入字幕（自动拆分为多个 text clip）
-ffclaw text subtitle ./字幕.srt --style caption --font "黑体" --size 36
+# 设置样式
+ffclaw text style c1 --font sans --color #ffffff --outline 2 --shadow 1 --bold
+
+# 列出所有文字片段
+ffclaw text list
+
+# 删除文字片段
+ffclaw text remove c1
 ```
 
 ---

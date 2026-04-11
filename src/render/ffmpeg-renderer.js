@@ -10,7 +10,7 @@
  *    output at which the transition begins:
  *      offset(i) = Σ clip[0..i-1].effectiveDuration - Σ trans[0..i-1].duration
  * 4. Audio clips are mixed with amix / adelay.
- * 5. Text overlays use the drawtext filter.
+ * 5. Text overlays use the drawtext filter (ASS+libass preferred, drawtext fallback).
  * 6. ffmpeg is spawned and progress is reported via a RegExp on stderr.
  *
  * @module render/ffmpeg-renderer
@@ -19,7 +19,12 @@
 import { spawn } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { tmpdir } from 'node:os';
+import { writeFileSync } from 'node:fs';
 import { resolveTransitionFilter } from './gl-compat.js';
+import { generateASS } from '../ass/generator.js';
+import { FONTS_DIR } from '../ass/fonts.js';
+import { checkLibass } from '../ass/libass-check.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 export const PROJECT_ROOT = path.resolve(__dirname, '../..');
@@ -347,12 +352,36 @@ export async function renderWithFFmpeg(model, projectData, projectDir, renderOpt
 
   // Apply text overlays onto the video output pad
   let finalVideoPad = videoGraph.outPad;
+  let assFilePath = null;
   if (finalVideoPad && textClips.length > 0) {
-    const textFilters = buildTextFilters(textClips);
-    if (textFilters.length > 0) {
+    const libassAvailable = checkLibass(ffmpegBin);
+    if (libassAvailable) {
+      // ── Use ASS / libass ───────────────────────────────────────────────
+      const { width = 1920, height = 1080 } = projectData;
+      const assContent = generateASS(textClips, { width, height });
+      assFilePath = path.join(tmpdir(), `ffclaw-${Date.now()}.ass`);
+      writeFileSync(assFilePath, assContent, 'utf8');
       const textPad = 'vtext';
-      allFilterLines.push(`[${finalVideoPad}]${textFilters.join(',')}[${textPad}];`);
+      const escapedAss = escapeFilterVal(assFilePath);
+      const escapedFontsDir = escapeFilterVal(FONTS_DIR);
+      allFilterLines.push(
+        `[${finalVideoPad}]subtitles=${escapedAss}:fontsdir=${escapedFontsDir}[${textPad}];`
+      );
       finalVideoPad = textPad;
+      if (!reportOpts.quiet && !reportOpts.json) {
+        process.stdout.write(`[ASS] Using libass (${textClips.length} text clip(s))\n`);
+      }
+    } else {
+      // ── Fallback: drawtext ──────────────────────────────────────────────
+      const textFilters = buildTextFilters(textClips);
+      if (textFilters.length > 0) {
+        const textPad = 'vtext';
+        allFilterLines.push(`[${finalVideoPad}]${textFilters.join(',')}[${textPad}];`);
+        finalVideoPad = textPad;
+        if (!reportOpts.quiet && !reportOpts.json) {
+          process.stdout.write('[ASS] libass unavailable — falling back to drawtext\n');
+        }
+      }
     }
   }
 
