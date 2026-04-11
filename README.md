@@ -300,6 +300,13 @@ ffclaw text remove c1
 | fade | ![fade](docs/transition-previews/fade.gif) |
 | slide-up | ![slide-up](docs/transition-previews/slide-up.gif) |
 | karaoke | ![karaoke](docs/transition-previews/karaoke.gif) |
+| typewriter | ![typewriter](docs/transition-previews/typewriter.gif) |
+
+**描边与阴影样式（静态效果）：**
+
+| 样式 | 预览 |
+|------|------|
+| 描边 / 阴影 / 描边+阴影 / 彩色描边 | ![styles](docs/transition-previews/styles.gif) |
 
 ---
 
