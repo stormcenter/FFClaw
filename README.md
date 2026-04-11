@@ -293,6 +293,14 @@ ffclaw text list
 ffclaw text remove c1
 ```
 
+**动画效果预览（内置字体，自动生成）：**
+
+| 动画 | 预览 |
+|------|------|
+| fade | ![fade](docs/transition-previews/fade.gif) |
+| slide-up | ![slide-up](docs/transition-previews/slide-up.gif) |
+| karaoke | ![karaoke](docs/transition-previews/karaoke.gif) |
+
 ---
 
 ### export — 导出视频
